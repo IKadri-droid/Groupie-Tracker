@@ -1,0 +1,16 @@
+{
+    "artists": [
+        {
+            "id": 1,
+            "name": "Daft Punk",
+            "genre": "Electronic",
+            "year": 1993
+        },
+        {
+            "id": 2,
+            "name": "Daft Punk",
+            "genre": "Electronic",
+            "year": 1993
+        }
+    ]
+}
