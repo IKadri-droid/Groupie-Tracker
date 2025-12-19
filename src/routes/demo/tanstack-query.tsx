@@ -6,16 +6,22 @@ export const Route = createFileRoute('/demo/tanstack-query')({
 })
 
 function TanStackQueryDemo() {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery<any>({
     queryKey: ['todos'],
-    queryFn: () =>
-      Promise.resolve([
-        { id: 1, name: 'Alice' },
-        { id: 2, name: 'Bob' },
-        { id: 3, name: 'Charlie' },
-      ]),
+    queryFn: async () => {
+      const response = await fetch('http://localhost:8080/api/artists')
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+
+      return response.json()
+    },
     initialData: [],
   })
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div
@@ -30,12 +36,12 @@ function TanStackQueryDemo() {
           TanStack Query Simple Promise Handling
         </h1>
         <ul className="mb-4 space-y-2">
-          {data.map((todo) => (
+          {data.map((artist) => (
             <li
-              key={todo.id}
+              key={artist.id}
               className="bg-white/10 border border-white/20 rounded-lg p-3 backdrop-blur-sm shadow-md"
             >
-              <span className="text-lg text-white">{todo.name}</span>
+              <span className="text-lg text-white">{artist.name}</span>
             </li>
           ))}
         </ul>
