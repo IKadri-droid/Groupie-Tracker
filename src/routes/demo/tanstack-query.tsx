@@ -1,12 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 
+// Définition du type Artist pour TypeScript
+interface Artist {
+  id: number
+  name: string
+  genre: string
+  year: number
+}
+
 export const Route = createFileRoute('/demo/tanstack-query')({
   component: TanStackQueryDemo,
 })
 
 function TanStackQueryDemo() {
-  const { data, isLoading } = useQuery<any>({
+  // On type useQuery avec Artist[] (tableau d'artistes)
+  const { data, isLoading } = useQuery<Artist[]>({
     queryKey: ['todos'],
     queryFn: async () => {
       const response = await fetch('http://localhost:8080/api/artists')
