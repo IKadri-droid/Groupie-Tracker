@@ -3,6 +3,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import Header from '../components/Header'
+import { Toaster } from "../components/ui/sonner" // Ajouté
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
@@ -17,6 +18,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     <>
       <Header />
       <Outlet />
+      <Toaster /> {/* Le conteneur de notifications */}
       <TanStackDevtools
         config={{
           position: 'bottom-right',
