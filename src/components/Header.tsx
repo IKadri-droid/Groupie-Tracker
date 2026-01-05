@@ -4,10 +4,17 @@ import { useState } from 'react'
 import { Home, LogIn, LogOut, Menu, Network, User, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { useAuthStore } from "../store/authStore"
+import { toast } from "sonner" // Ajouté
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const { user, logout } = useAuthStore()
+
+  // Fonction pour se déconnecter proprement avec une notification
+  const handleLogout = () => {
+    logout()
+    toast.info("Vous avez été déconnecté")
+  }
 
   return (
     <>
@@ -33,7 +40,7 @@ export default function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={logout}
+                onClick={handleLogout} // Utilise la nouvelle fonction
                 className="text-white hover:text-red-400"
                 title="Déconnexion"
               >
