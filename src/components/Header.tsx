@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 
 import { useState } from 'react'
 import { Home, LogIn, LogOut, Menu, Network, User, X } from 'lucide-react'
@@ -33,10 +33,19 @@ export default function Header() {
         <div className="flex items-center gap-4">
           {user ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium bg-gray-700 px-3 py-1 rounded-full flex items-center gap-2">
-                <User size={16} />
-                {user}
-              </span>
+              <Button
+                variant="ghost"
+                className="hover:bg-transparent p-0 h-auto"
+                title="Profil"
+                asChild>
+                <Link to="/profil">
+                  <span className="text-sm font-medium bg-gray-700 px-3 py-1 rounded-full flex items-center gap-2">
+                    <User size={16} />
+                    {user}
+                  </span>
+                </Link>
+              </Button>
+
               <Button
                 variant="ghost"
                 size="icon"
@@ -56,12 +65,13 @@ export default function Header() {
             </Button>
           )}
         </div>
-      </header>
+      </header >
 
       {/* Sidebar */}
-      <aside
+      < aside
         className={`fixed top-0 left-0 h-full w-80 bg-gray-900 text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          }`
+        }
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h2 className="text-xl font-bold">Groupie Tracker</h2>
@@ -105,7 +115,7 @@ export default function Header() {
 
           {/* Demo Links End */}
         </nav>
-      </aside>
+      </aside >
     </>
   )
 }
