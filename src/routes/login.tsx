@@ -1,10 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
 import { loginUser } from "../api/auth"
 import * as z from "zod"
 import { useAuthStore } from "../store/authStore" // importe le store
+import { toast } from "sonner" // 1. On importe "toast" (le messager)
 
 // Import des nouveaux composants Shadcn
 import { Button } from "../components/ui/button"
@@ -38,6 +39,8 @@ export const Route = createFileRoute('/login')({
 })
 
 function LoginComponent() {
+    const navigate = useNavigate() // 2. Initialise le hook navigate
+
     const setLogin = useAuthStore((state) => state.setLogin)
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -52,12 +55,11 @@ function LoginComponent() {
         onSuccess: (data) => {
             // 1. On enregistre dans l'état global
             setLogin(data.user, data.token)
-
-            console.log("Connecté en tant que :", data.user)
-            alert("Bienvenue " + data.user)
+            toast.success("Connexion réussie ! Bienvenue " + data.user)
+            navigate({ to: '/' }) //redirige vers page d'accueil
         },
         onError: (error: Error) => {
-            alert(error.message)
+            toast.error(error.message)
         }
     })
 
