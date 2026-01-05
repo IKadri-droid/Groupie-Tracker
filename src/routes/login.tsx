@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation } from "@tanstack/react-query"
+import { loginUser } from "../api/auth"
 import * as z from "zod"
+import { useAuthStore } from "../store/authStore" // importe le store
 
 // Import des nouveaux composants Shadcn
 import { Button } from "../components/ui/button"
@@ -35,6 +38,7 @@ export const Route = createFileRoute('/login')({
 })
 
 function LoginComponent() {
+    const setLogin = useAuthStore((state) => state.setLogin)
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -42,10 +46,26 @@ function LoginComponent() {
             password: "",
         },
     })
+    // La mutation TanStack Query
+    const mutation = useMutation({
+        mutationFn: loginUser,
+        onSuccess: (data) => {
+            // 1. On enregistre dans l'état global
+            setLogin(data.user, data.token)
+
+            console.log("Connecté en tant que :", data.user)
+            alert("Bienvenue " + data.user)
+        },
+        onError: (error: Error) => {
+            alert(error.message)
+        }
+    })
+
 
     function onSubmit(data: LoginFormValues) {
-        console.log("Données valides :", data)
+        mutation.mutate(data) // On lance l'appel API !
     }
+
 
     return (
         <div className="flex items-center justify-center min-h-[80vh] p-4">
@@ -89,8 +109,8 @@ function LoginComponent() {
                                 )}
                             />
 
-                            <Button type="submit" className="w-full">
-                                Se connecter
+                            <Button type="submit" className="w-full" disabled={mutation.isPending}>
+                                {mutation.isPending ? "Connexion..." : "Se connecter"}
                             </Button>
                         </form>
                     </Form>
