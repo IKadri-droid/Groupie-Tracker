@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware' // Ajouté
+import { persist } from 'zustand/middleware'
 
 interface AuthState {
     user: string | null
