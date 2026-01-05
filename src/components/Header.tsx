@@ -1,11 +1,13 @@
 import { Link } from '@tanstack/react-router'
 
 import { useState } from 'react'
-import { Home, LogIn, Menu, Network, X } from 'lucide-react'
+import { Home, LogIn, LogOut, Menu, Network, User, X } from 'lucide-react'
 import { Button } from './ui/button'
+import { useAuthStore } from "../store/authStore"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const { user, logout } = useAuthStore()
 
   return (
     <>
@@ -21,9 +23,32 @@ export default function Header() {
         </button>
 
 
-        <Button variant="outline" className="gap-2 text-black" asChild>
-          <Link to="/login">Se connecter</Link>
-        </Button>
+        <div className="flex items-center gap-4">
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium bg-gray-700 px-3 py-1 rounded-full flex items-center gap-2">
+                <User size={16} />
+                {user}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={logout}
+                className="text-white hover:text-red-400"
+                title="Déconnexion"
+              >
+                <LogOut size={20} />
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outline" className="gap-2 text-black" asChild>
+              <Link to="/login">
+                <LogIn size={20} />
+                Se connecter
+              </Link>
+            </Button>
+          )}
+        </div>
       </header>
 
       {/* Sidebar */}
