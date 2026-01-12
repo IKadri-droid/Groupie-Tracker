@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
-    "os"
 )
 
 var driver neo4j.DriverWithContext
@@ -16,16 +17,18 @@ func main() {
 	ctx := context.Background()
 	driver, err = connectNeo4j()
 	if err != nil {
-		log.Fatal("❌ Erreur de connexion Neo4j:", err)
+		log.Println("❌ Erreur de création du driver Neo4j:", err)
 	}
 	defer driver.Close(ctx)
 
 	// Vérifier la connexion
 	err = driver.VerifyConnectivity(ctx)
 	if err != nil {
-		log.Fatal("❌ Impossible de joindre Neo4j:", err)
+		fmt.Println("⚠️ ATTENTION: Impossible de joindre Neo4j. Le serveur démarre mais les requêtes échoueront.")
+		fmt.Println("Erreur:", err)
+	} else {
+		fmt.Println("✅ Connecté à Neo4j")
 	}
-	fmt.Println("✅ Connecté à Neo4j")
 
 	http.HandleFunc("/api/artists", handleArtists)
 	http.HandleFunc("/api/artists/", handleArtists)
@@ -37,10 +40,21 @@ func main() {
 }
 
 func connectNeo4j() (neo4j.DriverWithContext, error) {
-    uri := os.Getenv("NEO4J_URI") // Récupéré du docker-compose
-    user := os.Getenv("NEO4J_USER")
-    pass := os.Getenv("NEO4J_PASS")
+	uri := os.Getenv("NEO4J_URI")
+	if uri == "" {
+		uri = "bolt://localhost:7687"
+	}
 
-    driver, err := neo4j.NewDriverWithContext(uri, neo4j.BasicAuth(user, pass, ""))
-    return driver, err
+	user := os.Getenv("NEO4J_USER")
+	if user == "" {
+		user = "neo4j"
+	}
+
+	pass := os.Getenv("NEO4J_PASS")
+	if pass == "" {
+		pass = "password"
+	}
+
+	driver, err := neo4j.NewDriverWithContext(uri, neo4j.BasicAuth(user, pass, ""))
+	return driver, err
 }
