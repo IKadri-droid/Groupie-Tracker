@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 // Artist représente un artiste/groupe de musique
@@ -55,12 +58,35 @@ func handleArtists(w http.ResponseWriter, r *http.Request) {
 
 // getAllArtists retourne la liste de tous les artistes
 func getAllArtists(w http.ResponseWriter, r *http.Request) {
-	data, err := loadData()
+	ctx := context.Background()
+	query := "MATCH (a:Artist) RETURN a.id, a.name, a.genre, a.year ORDER BY a.id"
+
+	result, err := neo4j.ExecuteQuery(ctx, driver, query, nil, neo4j.EagerResultTransformer)
 	if err != nil {
-		http.Error(w, "Erreur lecture données", http.StatusInternalServerError)
+		http.Error(w, "Erreur base de données: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(data.Artists)
+
+	var artists []Artist
+	for _, record := range result.Records {
+		id, _ := record.Get("a.id")
+		name, _ := record.Get("a.name")
+		genre, _ := record.Get("a.genre")
+		year, _ := record.Get("a.year")
+
+		artists = append(artists, Artist{
+			ID:    int(id.(int64)),
+			Name:  name.(string),
+			Genre: genre.(string),
+			Year:  int(year.(int64)),
+		})
+	}
+
+	// Si vide, retourner un tableau vide plutôt que null
+	if artists == nil {
+		artists = []Artist{}
+	}
+	json.NewEncoder(w).Encode(artists)
 }
 
 // getArtistByID retourne un artiste par son ID
@@ -71,19 +97,35 @@ func getArtistByID(w http.ResponseWriter, r *http.Request, idStr string) {
 		return
 	}
 
-	data, err := loadData()
+	ctx := context.Background()
+	query := "MATCH (a:Artist {id: $id}) RETURN a.id, a.name, a.genre, a.year"
+	params := map[string]any{"id": id}
+
+	result, err := neo4j.ExecuteQuery(ctx, driver, query, params, neo4j.EagerResultTransformer)
 	if err != nil {
-		http.Error(w, "Erreur lecture données", http.StatusInternalServerError)
+		http.Error(w, "Erreur base de données", http.StatusInternalServerError)
 		return
 	}
 
-	for _, artist := range data.Artists {
-		if artist.ID == id {
-			json.NewEncoder(w).Encode(artist)
-			return
-		}
+	if len(result.Records) == 0 {
+		http.Error(w, "Artiste non trouvé", http.StatusNotFound)
+		return
 	}
-	http.Error(w, "Artiste non trouvé", http.StatusNotFound)
+
+	record := result.Records[0]
+	resId, _ := record.Get("a.id")
+	name, _ := record.Get("a.name")
+	genre, _ := record.Get("a.genre")
+	year, _ := record.Get("a.year")
+
+	artist := Artist{
+		ID:    int(resId.(int64)),
+		Name:  name.(string),
+		Genre: genre.(string),
+		Year:  int(year.(int64)),
+	}
+
+	json.NewEncoder(w).Encode(artist)
 }
 
 // createArtist crée un nouvel artiste
@@ -94,25 +136,29 @@ func createArtist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := loadData()
+	ctx := context.Background()
+	
+	// Trouver le nouvel ID
+	idQuery := "MATCH (a:Artist) RETURN coalesce(max(a.id), 0) + 1 as newId"
+	idRes, err := neo4j.ExecuteQuery(ctx, driver, idQuery, nil, neo4j.EagerResultTransformer)
 	if err != nil {
-		http.Error(w, "Erreur lecture données", http.StatusInternalServerError)
+		http.Error(w, "Erreur génération ID", http.StatusInternalServerError)
 		return
 	}
+	newID := idRes.Records[0].Values[0].(int64)
+	newArtist.ID = int(newID)
 
-	// Générer un nouvel ID (max ID + 1)
-	maxID := 0
-	for _, artist := range data.Artists {
-		if artist.ID > maxID {
-			maxID = artist.ID
-		}
+	createQuery := "CREATE (a:Artist {id: $id, name: $name, genre: $genre, year: $year}) RETURN a"
+	params := map[string]any{
+		"id":    newArtist.ID,
+		"name":  newArtist.Name,
+		"genre": newArtist.Genre,
+		"year":  newArtist.Year,
 	}
-	newArtist.ID = maxID + 1
 
-	data.Artists = append(data.Artists, newArtist)
-
-	if err := saveData(data); err != nil {
-		http.Error(w, "Erreur sauvegarde", http.StatusInternalServerError)
+	_, err = neo4j.ExecuteQuery(ctx, driver, createQuery, params, neo4j.EagerResultTransformer)
+	if err != nil {
+		http.Error(w, "Erreur création", http.StatusInternalServerError)
 		return
 	}
 
@@ -133,26 +179,29 @@ func updateArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 		http.Error(w, "Données invalides", http.StatusBadRequest)
 		return
 	}
+	updatedArtist.ID = id
 
-	data, err := loadData()
+	ctx := context.Background()
+	query := "MATCH (a:Artist {id: $id}) SET a.name = $name, a.genre = $genre, a.year = $year RETURN a"
+	params := map[string]any{
+		"id":    id,
+		"name":  updatedArtist.Name,
+		"genre": updatedArtist.Genre,
+		"year":  updatedArtist.Year,
+	}
+
+	result, err := neo4j.ExecuteQuery(ctx, driver, query, params, neo4j.EagerResultTransformer)
 	if err != nil {
-		http.Error(w, "Erreur lecture données", http.StatusInternalServerError)
+		http.Error(w, "Erreur mise à jour", http.StatusInternalServerError)
 		return
 	}
 
-	for i, artist := range data.Artists {
-		if artist.ID == id {
-			updatedArtist.ID = id
-			data.Artists[i] = updatedArtist
-			if err := saveData(data); err != nil {
-				http.Error(w, "Erreur sauvegarde", http.StatusInternalServerError)
-				return
-			}
-			json.NewEncoder(w).Encode(updatedArtist)
-			return
-		}
+	if len(result.Records) == 0 {
+		http.Error(w, "Artiste non trouvé", http.StatusNotFound)
+		return
 	}
-	http.Error(w, "Artiste non trouvé", http.StatusNotFound)
+
+	json.NewEncoder(w).Encode(updatedArtist)
 }
 
 // deleteArtist supprime un artiste
@@ -163,24 +212,16 @@ func deleteArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 		return
 	}
 
-	data, err := loadData()
+	ctx := context.Background()
+	query := "MATCH (a:Artist {id: $id}) DETACH DELETE a"
+	params := map[string]any{"id": id}
+
+	_, err = neo4j.ExecuteQuery(ctx, driver, query, params, neo4j.EagerResultTransformer)
 	if err != nil {
-		http.Error(w, "Erreur lecture données", http.StatusInternalServerError)
+		http.Error(w, "Erreur suppression", http.StatusInternalServerError)
 		return
 	}
 
-	for i, artist := range data.Artists {
-		if artist.ID == id {
-			// Supprimer l'artiste du slice
-			data.Artists = append(data.Artists[:i], data.Artists[i+1:]...)
-			if err := saveData(data); err != nil {
-				http.Error(w, "Erreur sauvegarde", http.StatusInternalServerError)
-				return
-			}
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]string{"message": "Artiste supprimé"})
-			return
-		}
-	}
-	http.Error(w, "Artiste non trouvé", http.StatusNotFound)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Artiste supprimé"})
 }
