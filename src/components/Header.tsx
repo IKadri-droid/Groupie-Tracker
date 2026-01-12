@@ -41,7 +41,7 @@ export default function Header() {
                 <Link to="/profil">
                   <span className="text-sm font-medium bg-gray-700 px-3 py-1 rounded-full flex items-center gap-2">
                     <User size={16} />
-                    {user}
+                    {user?.email}
                   </span>
                 </Link>
               </Button>

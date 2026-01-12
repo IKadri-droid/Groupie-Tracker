@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useArtists } from '../hooks/useArtists'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -39,25 +40,29 @@ function App() {
 
         {/* Grille des artistes */}
         {!isLoading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {artists.map((artist) => (
-              <div
+              <Card
                 key={artist.id}
-                className="bg-slate-800/60 backdrop-blur rounded-2xl p-6 border border-slate-700 hover:border-pink-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-pink-500/10"
+                className="bg-slate-800/60 backdrop-blur border-slate-700 hover:border-pink-500/50 transition-all hover:scale-105 hover:shadow-xl hover:shadow-pink-500/10"
               >
-                <div className="text-4xl mb-4">🎵</div>
-                <h2 className="text-xl font-bold mb-2">{artist.name}</h2>
-                <div className="space-y-1 text-sm text-slate-400">
-                  <p>
-                    <span className="text-slate-500">Genre:</span>{' '}
-                    <span className="text-white">{artist.genre}</span>
-                  </p>
-                  <p>
-                    <span className="text-slate-500">Année:</span>{' '}
-                    <span className="text-white">{artist.year}</span>
-                  </p>
-                </div>
-              </div>
+                <CardHeader>
+                  <div className="text-4xl mb-2">🎵</div>
+                  <CardTitle className="text-xl">{artist.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm text-slate-400">
+                    <p>
+                      <span className="text-slate-500">Genre:</span>{' '}
+                      <span className="text-white">{artist.genre}</span>
+                    </p>
+                    <p>
+                      <span className="text-slate-500">Année:</span>{' '}
+                      <span className="text-white">{artist.year}</span>
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
