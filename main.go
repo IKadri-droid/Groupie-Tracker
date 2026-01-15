@@ -1,60 +1,53 @@
 package main
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
-var driver neo4j.DriverWithContext
+var db *sql.DB
 
 func main() {
 	var err error
-	ctx := context.Background()
-	driver, err = connectNeo4j()
-	if err != nil {
-		log.Println("❌ Erreur de création du driver Neo4j:", err)
-	}
-	defer driver.Close(ctx)
 
-	// Vérifier la connexion
-	err = driver.VerifyConnectivity(ctx)
-	if err != nil {
-		fmt.Println("⚠️ ATTENTION: Impossible de joindre Neo4j. Le serveur démarre mais les requêtes échoueront.")
-		fmt.Println("Erreur:", err)
-	} else {
-		fmt.Println("✅ Connecté à Neo4j")
+	// Charger les variables d'environnement depuis .env
+	if err := godotenv.Load(); err != nil {
+		log.Println("ℹ️ No .env file found")
 	}
+
+	connStr := os.Getenv("DATABASE_URL")
+	if connStr == "" {
+		log.Println("⚠️ DATABASE_URL not set, using default for local (might fail if not configured)")
+		connStr = "postgres://user:password@localhost:5432/groupie?sslmode=disable"
+	}
+
+	db, err = sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal("❌ Error opening database connection:", err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		log.Println("⚠️ WARNING: Could not connect to Postgres:", err)
+	} else {
+		fmt.Println("✅ Connected to Postgres (Neon)")
+	}
+
+	// Initialiser la base de données (schéma + données)
+	initDatabase()
 
 	http.HandleFunc("/api/artists", handleArtists)
 	http.HandleFunc("/api/artists/", handleArtists)
 	http.HandleFunc("/api/login", handleLogin)
 
 	port := ":8080"
-	fmt.Println("🚀 Serveur API REST démarré sur http://localhost" + port)
+	fmt.Println("🚀 REST API Server started on http://localhost" + port)
 	log.Fatal(http.ListenAndServe(port, nil))
-}
-
-func connectNeo4j() (neo4j.DriverWithContext, error) {
-	uri := os.Getenv("NEO4J_URI")
-	if uri == "" {
-		uri = "bolt://localhost:7687"
-	}
-
-	user := os.Getenv("NEO4J_USER")
-	if user == "" {
-		user = "neo4j"
-	}
-
-	pass := os.Getenv("NEO4J_PASS")
-	if pass == "" {
-		pass = "password"
-	}
-
-	driver, err := neo4j.NewDriverWithContext(uri, neo4j.BasicAuth(user, pass, ""))
-	return driver, err
 }

@@ -1,16 +1,15 @@
-# Utilise la version 1.25 pour correspondre à ton go.mod
 FROM golang:1.25-alpine
 
 WORKDIR /app
 
-# On copie les fichiers de dépendances
+# 1. Copier les fichiers de définition des modules
 COPY go.mod go.sum ./
 
-# Cette étape ne devrait plus planter
+# 2. Télécharger les dépendances (sera mis en cache par Docker)
 RUN go mod download
 
+# 3. Copier le reste du code source
 COPY . .
 
-# Pour le dev, on garde l'accès à Go.
-# Le build final pour prod serait multi-stage, mais pour docker-compose avec Air, on a besoin de Go.
-CMD ["go", "run", "main.go"]
+# 4. Lancer l'application
+CMD ["go", "run", "."]
