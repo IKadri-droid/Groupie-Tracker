@@ -42,10 +42,11 @@ func initDatabase() {
 
 	type JSONData struct {
 		Artists []struct {
-			ID    int    `json:"id"`
-			Name  string `json:"name"`
-			Genre string `json:"genre"`
-			Year  int    `json:"year"`
+			ID       int    `json:"id"`
+			Name     string `json:"name"`
+			Genre    string `json:"genre"`
+			Year     int    `json:"year"`
+			ImageURL string `json:"image_url"`
 		} `json:"artists"`
 	}
 
@@ -67,7 +68,7 @@ func initDatabase() {
 		return
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO artists (id, name, genre, formation_year) VALUES ($1, $2, $3, $4)")
+	stmt, err := tx.Prepare("INSERT INTO artists (id, name, genre, formation_year, image_url) VALUES ($1, $2, $3, $4, $5)")
 	if err != nil {
 		log.Println("❌ Erreur préparation requête:", err)
 		tx.Rollback()
@@ -76,7 +77,7 @@ func initDatabase() {
 	defer stmt.Close()
 
 	for _, artist := range data.Artists {
-		_, err = stmt.Exec(artist.ID, artist.Name, artist.Genre, artist.Year)
+		_, err = stmt.Exec(artist.ID, artist.Name, artist.Genre, artist.Year, artist.ImageURL)
 		if err != nil {
 			log.Println("❌ Erreur insertion artiste:", artist.Name, err)
 		}
