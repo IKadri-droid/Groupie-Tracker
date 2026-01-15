@@ -47,6 +47,7 @@ func initDatabase() {
 			Genre    string `json:"genre"`
 			Year     int    `json:"year"`
 			ImageURL string `json:"image_url"`
+			Color    string `json:"color"`
 		} `json:"artists"`
 	}
 
@@ -68,7 +69,7 @@ func initDatabase() {
 		return
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO artists (id, name, genre, formation_year, image_url) VALUES ($1, $2, $3, $4, $5)")
+	stmt, err := tx.Prepare("INSERT INTO artists (id, name, genre, formation_year, image_url, color) VALUES ($1, $2, $3, $4, $5, $6)")
 	if err != nil {
 		log.Println("❌ Erreur préparation requête:", err)
 		tx.Rollback()
@@ -77,7 +78,7 @@ func initDatabase() {
 	defer stmt.Close()
 
 	for _, artist := range data.Artists {
-		_, err = stmt.Exec(artist.ID, artist.Name, artist.Genre, artist.Year, artist.ImageURL)
+		_, err = stmt.Exec(artist.ID, artist.Name, artist.Genre, artist.Year, artist.ImageURL, artist.Color)
 		if err != nil {
 			log.Println("❌ Erreur insertion artiste:", artist.Name, err)
 		}

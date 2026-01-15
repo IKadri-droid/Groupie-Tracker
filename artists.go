@@ -15,6 +15,7 @@ type Artist struct {
 	Genre    string `json:"genre"`
 	Year     int    `json:"year"`
 	ImageURL string `json:"image_url"`
+	Color    string `json:"color"`
 }
 
 // handleArtists gère les routes /api/artists
@@ -49,7 +50,7 @@ func handleArtists(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllArtists(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, name, genre, formation_year, image_url FROM artists ORDER BY id")
+	rows, err := db.Query("SELECT id, name, genre, formation_year, image_url, color FROM artists ORDER BY id")
 	if err != nil {
 		http.Error(w, "Erreur base de données: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -59,14 +60,16 @@ func getAllArtists(w http.ResponseWriter, r *http.Request) {
 	var artists []Artist
 	for rows.Next() {
 		var a Artist
-		// Use sql.NullString or pointer if fields can be null, assuming simplified for now
 		var imageURL sql.NullString
-		if err := rows.Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL); err != nil {
-			// Handle potential nulls simply or ignore error
+		var color sql.NullString
+		if err := rows.Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color); err != nil {
 			continue
 		}
 		if imageURL.Valid {
 			a.ImageURL = imageURL.String
+		}
+		if color.Valid {
+			a.Color = color.String
 		}
 		artists = append(artists, a)
 	}
@@ -86,13 +89,17 @@ func getArtistByID(w http.ResponseWriter, r *http.Request, idStr string) {
 
 	var a Artist
 	var imageURL sql.NullString
-	err = db.QueryRow("SELECT id, name, genre, formation_year, image_url FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL)
+	var color sql.NullString
+	err = db.QueryRow("SELECT id, name, genre, formation_year, image_url, color FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color)
 	if err != nil {
 		http.Error(w, "Artiste non trouvé", http.StatusNotFound)
 		return
 	}
 	if imageURL.Valid {
 		a.ImageURL = imageURL.String
+	}
+	if color.Valid {
+		a.Color = color.String
 	}
 
 	json.NewEncoder(w).Encode(a)
@@ -106,8 +113,8 @@ func createArtist(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := db.QueryRow(
-		"INSERT INTO artists (name, genre, formation_year, image_url) VALUES ($1, $2, $3, $4) RETURNING id",
-		newArtist.Name, newArtist.Genre, newArtist.Year, newArtist.ImageURL,
+		"INSERT INTO artists (name, genre, formation_year, image_url, color) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		newArtist.Name, newArtist.Genre, newArtist.Year, newArtist.ImageURL, newArtist.Color,
 	).Scan(&newArtist.ID)
 
 	if err != nil {
@@ -133,8 +140,8 @@ func updateArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 	}
 	updatedArtist.ID = id
 
-	res, err := db.Exec("UPDATE artists SET name=$1, genre=$2, formation_year=$3, image_url=$4 WHERE id=$5",
-		updatedArtist.Name, updatedArtist.Genre, updatedArtist.Year, updatedArtist.ImageURL, id)
+	res, err := db.Exec("UPDATE artists SET name=$1, genre=$2, formation_year=$3, image_url=$4, color=$5 WHERE id=$6",
+		updatedArtist.Name, updatedArtist.Genre, updatedArtist.Year, updatedArtist.ImageURL, updatedArtist.Color, id)
 	if err != nil {
 		http.Error(w, "Erreur mise à jour", http.StatusInternalServerError)
 		return

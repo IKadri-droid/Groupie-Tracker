@@ -5,6 +5,7 @@ CREATE TABLE artists (
     genre VARCHAR(100),
     formation_year INTEGER,
     image_url TEXT,
+    color VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
