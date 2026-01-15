@@ -7,4 +7,5 @@ export interface Artist {
     genre: string   // Le genre musical
     year: number    // L'année de création
     image_url?: string // L'URL de l'image de l'artiste
+    color?: string     // La couleur dominante de l'artiste
 }
