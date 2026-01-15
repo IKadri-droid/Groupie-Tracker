@@ -2,7 +2,7 @@
 
 ## Démarrage
 
-Pour lancer le serveur backend, il ne faut **PAS** utiliser `go run main.go` car cela ne compile que le fichier `main.go`.
+Pour lancer le serveur backend, il ne faut **PAS** utiliser `go run main.go` car le projet nécessite d'autres fichiers go.
 
 **Commande correcte :**
 
@@ -10,14 +10,10 @@ Pour lancer le serveur backend, il ne faut **PAS** utiliser `go run main.go` car
 go run .
 ```
 
-Le serveur démarrera sur `http://localhost:8080` et se connectera par défaut à Neo4j sur `localhost:7687` (utilisateur: `neo4j`, mot de passe: `password`).
+Le serveur démarrera sur `http://localhost:8080`.
+Le projet utilise une base de données **PostgreSQL** (configurée via `.env`).
 
-## Configuration (Optionnel)
+## Configuration
 
-Si vous avez besoin de changer la configuration, vous pouvez définir ces variables d'environnement :
-
-- `NEO4J_URI`
-- `NEO4J_USER`
-- `NEO4J_PASS`
-
-Ou utiliser le script PowerShell fourni : `.\run_dev.ps1`
+Les variables d'environnement sont chargées depuis le fichier `.env`.
+La variable principale est `DATABASE_URL`.
