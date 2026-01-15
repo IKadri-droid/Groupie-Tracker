@@ -1,5 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useArtists } from '../hooks/useArtists'
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -39,6 +43,7 @@ function App() {
 
         {/* Grille des artistes */}
         {!isLoading && !error && (
+<<<<<<< Updated upstream
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {artists.map((artist) => (
               <div
@@ -56,6 +61,44 @@ function App() {
                     <span className="text-slate-500">Année:</span>{' '}
                     <span className="text-white">{artist.year}</span>
                   </p>
+=======
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {artists.map((artist) => (
+              <div
+                key={artist.id}
+                className="group relative h-96 overflow-hidden rounded-2xl cursor-pointer shadow-2xl transition-all hover:-translate-y-2"
+              >
+                {/* Image de fond */}
+                <div className="absolute inset-0">
+                  {artist.image_url ? (
+                    <img
+                      src={artist.image_url}
+                      alt={artist.name}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-slate-800 flex items-center justify-center">
+                      <span className="text-6xl">🎵</span>
+                    </div>
+                  )}
+                  {/* Overlay dégradé */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                </div>
+
+                {/* Contenu */}
+                <div className="absolute inset-0 p-6 flex flex-col justify-end translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                  <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-md">
+                    {artist.name}
+                  </h2>
+                  <div className="space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                    <p className="text-pink-400 font-medium tracking-wide uppercase text-sm">
+                      {artist.genre}
+                    </p>
+                    <p className="text-slate-300 text-sm">
+                      Formé en {artist.year}
+                    </p>
+                  </div>
+>>>>>>> Stashed changes
                 </div>
               </div>
             ))}
