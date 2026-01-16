@@ -23,7 +23,7 @@ func main() {
 
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		log.Println("⚠️ DATABASE_URL not set, using default for local (might fail if not configured)")
+		log.Println("⚠️ DATABASE_URL not set)")
 		connStr = "postgres://user:password@localhost:5432/groupie?sslmode=disable"
 	}
 
@@ -46,6 +46,9 @@ func main() {
 	http.HandleFunc("/api/artists", handleArtists)
 	http.HandleFunc("/api/artists/", handleArtists)
 	http.HandleFunc("/api/login", handleLogin)
+	http.HandleFunc("/api/deezer/search", handleDeezerSearch)
+	http.HandleFunc("/api/deezer/albums", handleDeezerAlbums)
+	http.HandleFunc("/api/deezer/top-tracks", handleDeezerTopTracks)
 
 	port := ":8080"
 	fmt.Println("🚀 REST API Server started on http://localhost" + port)
