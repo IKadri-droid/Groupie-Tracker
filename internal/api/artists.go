@@ -43,7 +43,7 @@ func HandleArtists(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllArtists(w http.ResponseWriter, r *http.Request) {
-	rows, err := config.DB.Query("SELECT id, name, genre, date_last_album, image_url, color FROM artists ORDER BY id")
+	rows, err := config.DB.Query("SELECT id, name, genre, date_last_album, image_url, color, next_concert FROM artists ORDER BY id")
 	if err != nil {
 		http.Error(w, "Erreur base de données: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -55,7 +55,8 @@ func getAllArtists(w http.ResponseWriter, r *http.Request) {
 		var a models.Artist
 		var imageURL sql.NullString
 		var color sql.NullString
-		if err := rows.Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color); err != nil {
+		var next_concert sql.NullString
+		if err := rows.Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color, &next_concert); err != nil {
 			continue
 		}
 		if imageURL.Valid {
@@ -63,6 +64,9 @@ func getAllArtists(w http.ResponseWriter, r *http.Request) {
 		}
 		if color.Valid {
 			a.Color = color.String
+		}
+		if next_concert.Valid {
+			a.NextConcert = next_concert.String
 		}
 		artists = append(artists, a)
 	}
@@ -83,7 +87,8 @@ func getArtistByID(w http.ResponseWriter, r *http.Request, idStr string) {
 	var a models.Artist
 	var imageURL sql.NullString
 	var color sql.NullString
-	err = config.DB.QueryRow("SELECT id, name, genre, date_last_album, image_url, color FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color)
+	var next_concert sql.NullString
+	err = config.DB.QueryRow("SELECT id, name, genre, date_last_album, image_url, color, next_concert FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color, &a.NextConcert)
 	if err != nil {
 		http.Error(w, "Artiste non trouvé", http.StatusNotFound)
 		return
@@ -93,6 +98,9 @@ func getArtistByID(w http.ResponseWriter, r *http.Request, idStr string) {
 	}
 	if color.Valid {
 		a.Color = color.String
+	}
+	if next_concert.Valid {
+		a.NextConcert = next_concert.String
 	}
 
 	json.NewEncoder(w).Encode(a)
@@ -106,8 +114,8 @@ func createArtist(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := config.DB.QueryRow(
-		"INSERT INTO artists (name, genre, date_last_album, image_url, color) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-		newArtist.Name, newArtist.Genre, newArtist.Year, newArtist.ImageURL, newArtist.Color,
+		"INSERT INTO artists (name, genre, date_last_album, image_url, color, next_concert) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+		newArtist.Name, newArtist.Genre, newArtist.Year, newArtist.ImageURL, newArtist.Color, newArtist.NextConcert,
 	).Scan(&newArtist.ID)
 
 	if err != nil {
@@ -133,8 +141,8 @@ func updateArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 	}
 	updatedArtist.ID = id
 
-	res, err := config.DB.Exec("UPDATE artists SET name=$1, genre=$2, date_last_album=$3, image_url=$4, color=$5 WHERE id=$6",
-		updatedArtist.Name, updatedArtist.Genre, updatedArtist.Year, updatedArtist.ImageURL, updatedArtist.Color, id)
+	res, err := config.DB.Exec("UPDATE artists SET name=$1, genre=$2, date_last_album=$3, image_url=$4, color=$5, next_concert=$6 WHERE id=$7",
+		updatedArtist.Name, updatedArtist.Genre, updatedArtist.Year, updatedArtist.ImageURL, updatedArtist.Color, updatedArtist.NextConcert, id)
 	if err != nil {
 		http.Error(w, "Erreur mise à jour", http.StatusInternalServerError)
 		return
