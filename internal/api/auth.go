@@ -1,17 +1,15 @@
-package main
+package api
 
 import (
 	"encoding/json"
 	"net/http"
+
+	"groupie/internal/models"
 )
 
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-func handleLogin(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w)
+// HandleLogin gère l'authentification
+func HandleLogin(w http.ResponseWriter, r *http.Request) {
+	EnableCORS(w)
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
 		return
@@ -22,7 +20,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req LoginRequest
+	var req models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Données invalides", http.StatusBadRequest)
 		return

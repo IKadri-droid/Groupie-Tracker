@@ -1,51 +1,29 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
+	"groupie/internal/api"
+	"groupie/internal/config"
 )
 
-var db *sql.DB
-
 func main() {
-	var err error
-
-	// Charger les variables d'environnement depuis .env
-	if err := godotenv.Load(); err != nil {
-		log.Println("ℹ️ No .env file found")
+	// Initialiser la base de données
+	if err := config.InitDB(); err != nil {
+		log.Fatal("❌ Error initializing database:", err)
 	}
+	defer config.DB.Close()
 
-	connStr := os.Getenv("DATABASE_URL")
-	if connStr == "" {
-		log.Println("⚠️ DATABASE_URL not set, using default for local (might fail if not configured)")
-		connStr = "postgres://user:password@localhost:5432/groupie?sslmode=disable"
-	}
-
-	db, err = sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatal("❌ Error opening database connection:", err)
-	}
-	defer db.Close()
-
-	err = db.Ping()
-	if err != nil {
-		log.Println("⚠️ WARNING: Could not connect to Postgres:", err)
-	} else {
-		fmt.Println("✅ Connected to Postgres (Neon)")
-	}
-
-	// Initialiser la base de données (schéma + données)
-	initDatabase()
-
-	http.HandleFunc("/api/artists", handleArtists)
-	http.HandleFunc("/api/artists/", handleArtists)
-	http.HandleFunc("/api/login", handleLogin)
+	// Enregistrer les routes
+	http.HandleFunc("/api/artists", api.HandleArtists)
+	http.HandleFunc("/api/artists/", api.HandleArtists)
+	http.HandleFunc("/api/login", api.HandleLogin)
+	http.HandleFunc("/api/deezer/search", api.HandleDeezerSearch)
+	http.HandleFunc("/api/deezer/albums", api.HandleDeezerAlbums)
+	http.HandleFunc("/api/deezer/top-tracks", api.HandleDeezerTopTracks)
+	http.HandleFunc("/api/concerts", api.HandleConcerts)
 
 	port := ":8080"
 	fmt.Println("🚀 REST API Server started on http://localhost" + port)
