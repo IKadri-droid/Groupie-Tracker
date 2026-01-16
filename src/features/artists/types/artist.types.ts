@@ -8,4 +8,5 @@ export interface Artist {
     year: number    // L'année de création
     image_url?: string // L'URL de l'image de l'artiste
     color?: string     // La couleur dominante de l'artiste
+    next_concert?: string // Le prochain concert de l'artiste   
 }
