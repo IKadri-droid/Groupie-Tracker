@@ -1,19 +1,24 @@
 import {
-  Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
-} from '@/components/ui/carousel'
-import { Card, CardContent } from '@/components/ui/card'
-import { createFileRoute } from '@tanstack/react-router'
-import { useAuthStore } from '@/store/authStore'
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/shared/components/ui/carousel";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { createFileRoute } from "@tanstack/react-router";
+import { useAuthStore } from "@/features/auth";
 
-export const Route = createFileRoute('/profil')({
+export const Route = createFileRoute("/profil")({
   component: RouteComponent,
-})
-
+});
 
 export function RouteComponent() {
   return (
     <div className="flex flex-col items-center justify-center mt-20">
-      <h1 className="text-2xl font-bold mb-20">Bienvenue sur ton profil, {useAuthStore((state) => state.user?.email)}</h1>
+      <h1 className="text-2xl font-bold mb-20">
+        Bienvenue sur ton profil, {useAuthStore((state) => state.user?.email)}
+      </h1>
       <h2 className="text-xl font-bold mb-5">Tes musiques préférées</h2>
       <Carousel
         opts={{
@@ -38,5 +43,5 @@ export function RouteComponent() {
         <CarouselNext />
       </Carousel>
     </div>
-  )
+  );
 }

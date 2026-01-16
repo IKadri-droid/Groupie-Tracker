@@ -1,20 +1,20 @@
-import type { Artist } from "../types/artist";
+import type { Artist } from "../types/artist.types";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/shared/components/ui/dialog";
 import {
   useDeezerArtist,
   useDeezerTopTracks,
   useDeezerAlbums,
-} from "../hooks/useDeezerArtist";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+} from "@/features/deezer";
+import { Button } from "@/shared/components/ui/button";
+import { Slider } from "@/shared/components/ui/slider";
 import { Play, Pause } from "lucide-react";
 import { useRef, useState } from "react";
-import { ConcertList } from "./ConcertList";
+import { ConcertList } from "@/features/concerts";
 
 interface Props {
   isDialogOpen: boolean;
@@ -55,7 +55,7 @@ export default function ArtistDialog({
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogContent className="w-full rounded-3xl sm:!max-w-4xl backdrop-blur-lg bg-white/30 dark:bg-black/30 text-white [&>button]:hidden">
+      <DialogContent className="min-h-152 w-full rounded-3xl sm:!max-w-4xl backdrop-blur-lg bg-white/30 dark:bg-black/30 text-white [&>button]:hidden">
         <DialogHeader className="flex gap-4">
           {selectedArtist?.image_url ? (
             <img
@@ -71,9 +71,9 @@ export default function ArtistDialog({
           <DialogTitle className="text-5xl">{selectedArtist?.name}</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-3 gap-4 border-2 border-white/20 divide-x divide-white/20 text-center text-2xl font-bold rounded-lg mt-4">
+        <div className="grid grid-cols-3 gap-4 border-2 border-white/20 divide-x divide-white/20 text-center text-2xl font-bold rounded-lg">
           {/* dernier album */}
-          <div className="p-4 flex flex-col items-center">
+          <div className="p-4 flex flex-col items-center min-h-[300px]">
             <h1 className="mb-2">Dernier album</h1>
             {deezerAlbums?.[0]?.cover_medium && (
               <img

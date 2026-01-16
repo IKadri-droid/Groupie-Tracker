@@ -2,8 +2,8 @@
 // Ce hook gère automatiquement le cache, le loading et les erreurs
 
 import { useQuery } from '@tanstack/react-query'
-import { getArtists } from '../api/artists'
-import type { Artist } from '../types/artist'
+import { getArtists } from '../api/artistsApi'
+import type { Artist } from '../types/artist.types'
 
 /**
  * Hook pour récupérer la liste des artistes

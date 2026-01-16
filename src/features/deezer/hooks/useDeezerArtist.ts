@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { searchArtist, getAlbums, getTopTracks } from '../api/deezerApi'
 
 export const useDeezerArtist = (name: string) => {
     return useQuery({
         queryKey: ['deezer-artist', name],
-        queryFn: () => fetch(`http://localhost:8080/api/deezer/search?name=${name}`).then(res => res.json()),
+        queryFn: () => searchArtist(name),
         enabled: !!name,
     })
 }
@@ -11,7 +12,7 @@ export const useDeezerArtist = (name: string) => {
 export const useDeezerAlbums = (artistID: number) => {
     return useQuery({
         queryKey: ['deezer-albums', artistID],
-        queryFn: () => fetch(`http://localhost:8080/api/deezer/albums?artistID=${artistID}`).then(res => res.json()),
+        queryFn: () => getAlbums(artistID),
         enabled: !!artistID,
     })
 }
@@ -19,7 +20,7 @@ export const useDeezerAlbums = (artistID: number) => {
 export const useDeezerTopTracks = (artistID: number) => {
     return useQuery({
         queryKey: ['deezer-top-tracks', artistID],
-        queryFn: () => fetch(`http://localhost:8080/api/deezer/top-tracks?artistID=${artistID}`).then(res => res.json()),
+        queryFn: () => getTopTracks(artistID),
         enabled: !!artistID,
     })
 }

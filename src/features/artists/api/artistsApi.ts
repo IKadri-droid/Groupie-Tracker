@@ -1,7 +1,7 @@
 // API Layer - Fonctions pour communiquer avec le backend
 // Ce fichier contient toutes les fonctions qui font des requêtes HTTP
 
-import type { Artist } from '../types/artist'
+import type { Artist } from '../types/artist.types'
 
 // URL de base de l'API backend (Go sur le port 8080)
 const API_BASE_URL = 'http://localhost:8080/api'

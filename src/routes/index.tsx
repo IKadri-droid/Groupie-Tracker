@@ -1,75 +1,75 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useArtists } from '../hooks/useArtists'
-import { Card, CardContent } from '@/components/ui/card'
-import ArtistDialog from '@/components/ArtistDialog'
-import { useState, useEffect, useRef } from 'react'
-import type { Artist } from '../types/artist'
+import { createFileRoute } from "@tanstack/react-router";
+import { useArtists, ArtistDialog, type Artist } from "@/features/artists";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { useState, useEffect, useRef } from "react";
 
-
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   component: App,
-})
+});
 
 function App() {
-  const { data: artists = [], isLoading, error } = useArtists()
-  const [currentColor, setCurrentColor] = useState<string | null>(null)
-  const [fadingOutColor, setFadingOutColor] = useState<string | null>(null)
-  const [fadeKey, setFadeKey] = useState(0)
-  const lastColorRef = useRef<string | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null)
-  
+  const { data: artists = [], isLoading, error } = useArtists();
+  const [currentColor, setCurrentColor] = useState<string | null>(null);
+  const [fadingOutColor, setFadingOutColor] = useState<string | null>(null);
+  const [fadeKey, setFadeKey] = useState(0);
+  const lastColorRef = useRef<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+
   // Gérer les transitions de couleur
   useEffect(() => {
     // Si on a une nouvelle couleur
     if (currentColor && currentColor !== lastColorRef.current) {
       // Garder l'ancienne couleur pour le fade-out
       if (lastColorRef.current) {
-        setFadingOutColor(lastColorRef.current)
+        setFadingOutColor(lastColorRef.current);
       }
-      setFadeKey(k => k + 1)
-      lastColorRef.current = currentColor
-      
+      setFadeKey((k) => k + 1);
+      lastColorRef.current = currentColor;
+
       // Clear fading out color after animation
-      const timer = setTimeout(() => setFadingOutColor(null), 1000)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => setFadingOutColor(null), 1000);
+      return () => clearTimeout(timer);
     }
-    
+
     // Si on quitte une couleur (retour au fond de base)
     if (!currentColor && lastColorRef.current) {
-      setFadingOutColor(lastColorRef.current)
-      lastColorRef.current = null
-      
+      setFadingOutColor(lastColorRef.current);
+      lastColorRef.current = null;
+
       // Clear fading out color after animation
-      const timer = setTimeout(() => setFadingOutColor(null), 1000)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => setFadingOutColor(null), 1000);
+      return () => clearTimeout(timer);
     }
-  }, [currentColor])
+  }, [currentColor]);
 
   return (
     <div className="relative min-h-screen text-white p-8">
       {/* Background base (slate) */}
-      <div 
+      <div
         className="fixed inset-0 -z-30"
-        style={{ background: 'linear-gradient(to bottom right, #0f172a, #1e293b, #0f172a)' }}
+        style={{
+          background:
+            "linear-gradient(to bottom right, #0f172a, #1e293b, #0f172a)",
+        }}
       />
-      
+
       {/* Fading out color layer */}
       {fadingOutColor && (
-        <div 
+        <div
           className="fixed inset-0 -z-20 animate-fade-out"
-          style={{ 
+          style={{
             background: `linear-gradient(to bottom right, ${fadingOutColor}, #0f172a)`,
           }}
         />
       )}
-      
+
       {/* Current color layer (fades in) */}
       {currentColor && (
-        <div 
+        <div
           key={fadeKey}
           className="fixed inset-0 -z-10 animate-fade-in"
-          style={{ 
+          style={{
             background: `linear-gradient(to bottom right, ${currentColor}, #0f172a)`,
           }}
         />
@@ -103,7 +103,7 @@ function App() {
 
       {/* Grille des artistes (Pleine largeur) */}
       {!isLoading && !error && (
-        <div 
+        <div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
           onMouseLeave={() => setCurrentColor(null)}
         >
@@ -112,12 +112,11 @@ function App() {
               key={artist.id}
               className="group relative h-96 overflow-hidden rounded-2xl cursor-pointer shadow-2xl transition-all hover:-translate-y-2 border-0 bg-transparent p-0"
               onMouseEnter={() => {
-                setCurrentColor(artist.color ?? null)
+                setCurrentColor(artist.color ?? null);
               }}
-
               onClick={() => {
-                setSelectedArtist(artist)
-                setIsDialogOpen(true)
+                setSelectedArtist(artist);
+                setIsDialogOpen(true);
               }}
             >
               <CardContent className="p-0 h-full w-full relative">
@@ -172,5 +171,5 @@ function App() {
         selectedArtist={selectedArtist}
       />
     </div>
-  )
+  );
 }
