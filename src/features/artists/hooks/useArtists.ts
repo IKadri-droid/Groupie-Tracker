@@ -4,6 +4,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { getArtists } from '../api/artistsApi'
 import type { Artist } from '../types/artist.types'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createArtist } from '../api/artistsApi'
 
 /**
  * Hook pour récupérer la liste des artistes
@@ -17,5 +19,18 @@ export function useArtists() {
         queryKey: ['artists'],     // Clé unique pour identifier cette requête dans le cache
         queryFn: getArtists,       // La fonction qui fait le fetch
         staleTime: 1000 * 60 * 5,  // Les données restent "fraîches" pendant 5 minutes
+    })
+}
+
+export function useCreateArtist() {
+    const queryClient = useQueryClient()
+    
+    
+    return useMutation({
+        mutationFn: createArtist,
+        onSuccess: () => {
+            // Rafraîchit la liste des artistes après création
+            queryClient.invalidateQueries({ queryKey: ['artists'] })
+        },
     })
 }

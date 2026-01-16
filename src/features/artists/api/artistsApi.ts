@@ -35,3 +35,23 @@ export async function getArtistById(id: number): Promise<Artist> {
 
     return response.json()
 }
+
+/**
+ * Crée un nouvel artiste
+ * @param artist - Les données de l'artiste à créer (sans l'id)
+ * @returns Promise<Artist> - L'artiste créé avec son id
+ */
+export async function createArtist(artist: Omit<Artist, 'id'>): Promise<Artist> {   
+    /*Omit<Artist, 'id'> c'est Le type Artist mais sans le champ id (car il sera généré par le backend)*/
+    const response = await fetch(`${API_BASE_URL}/artists`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(artist),
+    })
+    if (!response.ok) {
+        throw new Error('Erreur lors de la création de l\'artiste')
+    }
+    return response.json()
+}
