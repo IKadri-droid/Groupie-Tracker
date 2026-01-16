@@ -28,7 +28,7 @@ export default function ArtistDialog({
   selectedArtist,
 }: Props) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [volume, setVolume] = useState([1]); // Tableau car le Slider Shadcn attend un tableau (0 à 1)
 
   const togglePlay = () => {
@@ -41,7 +41,7 @@ export default function ArtistDialog({
       setIsPlaying(!isPlaying);
     }
   };
-  const handleVolumeChange = (value) => {
+  const handleVolumeChange = (value: [number]) => {
     const newVol = value[0];
     setVolume([newVol]);
     if (audioRef.current) {
@@ -77,7 +77,7 @@ export default function ArtistDialog({
             <h1 className="mb-2">Dernier album</h1>
             {deezerAlbums?.[0]?.cover_medium && (
               <img
-                className="rounded-2xl mb-2"
+                className="rounded-2xl mb-2 w-48 h-48"
                 src={deezerAlbums[0].cover_medium}
                 alt="Cover"
               />
@@ -137,7 +137,6 @@ export default function ArtistDialog({
           {/* prochain concert */}
           <div className="p-4 flex flex-col items-center">
             <h1 className="mb-2">Prochain concert</h1>
-            {/* ✅ Bon : une div dans une div */}
             <div className="font-extralight text-lg">
               <ConcertList artistName={selectedArtist?.name || ""} />
             </div>
