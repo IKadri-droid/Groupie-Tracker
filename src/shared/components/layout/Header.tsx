@@ -12,11 +12,11 @@ export default function Header() {
 
   return (
     <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
-      <nav className="flex items-center gap-1 p-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 shadow-2xl">
+      <nav className="flex items-center gap-1 p-1.5 rounded-full  backdrop-blur-lg bg-white/30 dark:bg-black/30 border border-white/10 shadow-2xl">
         {/* Navigation items */}
         <Link
           to="/"
-          className="relative px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 hover:text-white text-slate-400"
+          className="relative px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 hover:text-gray-600 text-black"
           activeProps={{
             className:
               "bg-white text-black shadow-lg hover:text-black font-semibold",

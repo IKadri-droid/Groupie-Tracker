@@ -70,7 +70,7 @@ export default function ArtistDialog({
           <DialogTitle className="text-5xl">{selectedArtist?.name}</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-3 gap-4 border-2 border-white/20 divide-x divide-white/20 text-center text-2xl font-bold rounded-lg">
+        <div className="grid grid-cols-3 border-2 border-white/20 divide-x divide-white/20 text-center text-2xl font-bold rounded-lg">
           {/* dernier album */}
           <div className="p-4 flex flex-col items-center min-h-[300px]">
             <h1 className="mb-2">Dernier album</h1>
@@ -86,9 +86,9 @@ export default function ArtistDialog({
             </p>
           </div>
 
-          {/* --- COLONNE DU MILIEU : Single le plus écouté --- */}
+          {/* --- COLONNE DU MILIEU : Son le plus écouté --- */}
           <div className="p-4 flex flex-col items-center h-full relative z-10">
-            <h1 className="mb-2">Single le plus écouté</h1>
+            <h1 className="mb-2">Son le plus écouté</h1>
 
             <div className="flex-1 w-full flex items-center justify-center">
               <div className="relative flex items-center justify-center">
