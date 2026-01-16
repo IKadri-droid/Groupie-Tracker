@@ -55,3 +55,14 @@ export async function createArtist(artist: Omit<Artist, 'id'>): Promise<Artist> 
     }
     return response.json()
 }
+
+
+export async function deleteArtist(id:number){
+     const response = await fetch(`${API_BASE_URL}/artists/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    return response.json()
+}

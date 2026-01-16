@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getArtists } from '../api/artistsApi'
 import type { Artist } from '../types/artist.types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createArtist } from '../api/artistsApi'
+import { createArtist, deleteArtist } from '../api/artistsApi'
 
 /**
  * Hook pour récupérer la liste des artistes
@@ -28,6 +28,18 @@ export function useCreateArtist() {
     
     return useMutation({
         mutationFn: createArtist,
+        onSuccess: () => {
+            // Rafraîchit la liste des artistes après création
+            queryClient.invalidateQueries({ queryKey: ['artists'] })
+        },
+    })
+}
+
+export function useDeleteArtist() {
+    const queryClient = useQueryClient()
+    
+    return useMutation({
+        mutationFn: deleteArtist,
         onSuccess: () => {
             // Rafraîchit la liste des artistes après création
             queryClient.invalidateQueries({ queryKey: ['artists'] })
