@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useArtists } from '../hooks/useArtists'
 import { Card, CardContent } from '@/components/ui/card'
+import ArtistDialog from '@/components/ArtistDialog'
 import { useState, useEffect, useRef } from 'react'
+import type { Artist } from '../types/artist'
+
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -13,6 +16,8 @@ function App() {
   const [fadingOutColor, setFadingOutColor] = useState<string | null>(null)
   const [fadeKey, setFadeKey] = useState(0)
   const lastColorRef = useRef<string | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null)
   
   // Gérer les transitions de couleur
   useEffect(() => {
@@ -98,16 +103,22 @@ function App() {
 
       {/* Grille des artistes (Pleine largeur) */}
       {!isLoading && !error && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+        <div 
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+          onMouseLeave={() => setCurrentColor(null)}
+        >
           {artists.map((artist) => (
             <Card
               key={artist.id}
               className="group relative h-96 overflow-hidden rounded-2xl cursor-pointer shadow-2xl transition-all hover:-translate-y-2 border-0 bg-transparent p-0"
               onMouseEnter={() => {
-                const color = "#" + artist.color
-                setCurrentColor(color)
+                setCurrentColor(artist.color ?? null)
               }}
-              onMouseLeave={() => setCurrentColor(null)}
+
+              onClick={() => {
+                setSelectedArtist(artist)
+                setIsDialogOpen(true)
+              }}
             >
               <CardContent className="p-0 h-full w-full relative">
                 {/* Image de fond */}
@@ -154,6 +165,12 @@ function App() {
           <p>Aucun artiste trouvé</p>
         </div>
       )}
+
+      <ArtistDialog
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+        selectedArtist={selectedArtist}
+      />
     </div>
   )
 }
