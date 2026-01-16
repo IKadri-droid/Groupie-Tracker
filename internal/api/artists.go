@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"database/sql"
@@ -6,21 +6,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"groupie/internal/config"
+	"groupie/internal/models"
 )
 
-// Artist représente un artiste/groupe de musique
-type Artist struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Genre    string `json:"genre"`
-	Year     int    `json:"year"`
-	ImageURL string `json:"image_url"`
-	Color    string `json:"color"`
-}
-
-// handleArtists gère les routes /api/artists
-func handleArtists(w http.ResponseWriter, r *http.Request) {
-	enableCORS(w)
+// HandleArtists gère les routes /api/artists
+func HandleArtists(w http.ResponseWriter, r *http.Request) {
+	EnableCORS(w)
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method == "OPTIONS" {
@@ -50,16 +43,16 @@ func handleArtists(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllArtists(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, name, genre, formation_year, image_url, color FROM artists ORDER BY id")
+	rows, err := config.DB.Query("SELECT id, name, genre, formation_year, image_url, color FROM artists ORDER BY id")
 	if err != nil {
 		http.Error(w, "Erreur base de données: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	var artists []Artist
+	var artists []models.Artist
 	for rows.Next() {
-		var a Artist
+		var a models.Artist
 		var imageURL sql.NullString
 		var color sql.NullString
 		if err := rows.Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color); err != nil {
@@ -75,7 +68,7 @@ func getAllArtists(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if artists == nil {
-		artists = []Artist{}
+		artists = []models.Artist{}
 	}
 	json.NewEncoder(w).Encode(artists)
 }
@@ -87,10 +80,10 @@ func getArtistByID(w http.ResponseWriter, r *http.Request, idStr string) {
 		return
 	}
 
-	var a Artist
+	var a models.Artist
 	var imageURL sql.NullString
 	var color sql.NullString
-	err = db.QueryRow("SELECT id, name, genre, formation_year, image_url, color FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color)
+	err = config.DB.QueryRow("SELECT id, name, genre, formation_year, image_url, color FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color)
 	if err != nil {
 		http.Error(w, "Artiste non trouvé", http.StatusNotFound)
 		return
@@ -106,13 +99,13 @@ func getArtistByID(w http.ResponseWriter, r *http.Request, idStr string) {
 }
 
 func createArtist(w http.ResponseWriter, r *http.Request) {
-	var newArtist Artist
+	var newArtist models.Artist
 	if err := json.NewDecoder(r.Body).Decode(&newArtist); err != nil {
 		http.Error(w, "Données invalides", http.StatusBadRequest)
 		return
 	}
 
-	err := db.QueryRow(
+	err := config.DB.QueryRow(
 		"INSERT INTO artists (name, genre, formation_year, image_url, color) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		newArtist.Name, newArtist.Genre, newArtist.Year, newArtist.ImageURL, newArtist.Color,
 	).Scan(&newArtist.ID)
@@ -133,14 +126,14 @@ func updateArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 		return
 	}
 
-	var updatedArtist Artist
+	var updatedArtist models.Artist
 	if err := json.NewDecoder(r.Body).Decode(&updatedArtist); err != nil {
 		http.Error(w, "Données invalides", http.StatusBadRequest)
 		return
 	}
 	updatedArtist.ID = id
 
-	res, err := db.Exec("UPDATE artists SET name=$1, genre=$2, formation_year=$3, image_url=$4, color=$5 WHERE id=$6",
+	res, err := config.DB.Exec("UPDATE artists SET name=$1, genre=$2, formation_year=$3, image_url=$4, color=$5 WHERE id=$6",
 		updatedArtist.Name, updatedArtist.Genre, updatedArtist.Year, updatedArtist.ImageURL, updatedArtist.Color, id)
 	if err != nil {
 		http.Error(w, "Erreur mise à jour", http.StatusInternalServerError)
@@ -163,7 +156,7 @@ func deleteArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 		return
 	}
 
-	_, err = db.Exec("DELETE FROM artists WHERE id = $1", id)
+	_, err = config.DB.Exec("DELETE FROM artists WHERE id = $1", id)
 	if err != nil {
 		http.Error(w, "Erreur suppression", http.StatusInternalServerError)
 		return
