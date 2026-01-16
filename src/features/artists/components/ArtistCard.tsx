@@ -3,18 +3,20 @@ import type { Artist } from "../types/artist.types";
 
 interface ArtistCardProps {
   artist: Artist;
-  onMouseEnter: () => void;
+  onMouseEnter?: () => void;
   onClick: () => void;
+  disableHover?: boolean;
 }
 
 export default function ArtistCard({
   artist,
   onMouseEnter,
   onClick,
+  disableHover,
 }: ArtistCardProps) {
   return (
     <Card
-      className="group relative h-96 overflow-hidden rounded-2xl cursor-pointer shadow-2xl transition-all hover:-translate-y-2 border-0 bg-transparent p-0"
+      className="group relative h-96 overflow-hidden rounded-2xl cursor-pointer shadow-2xl transition-all ${disableHover ? ` ` : 'hover:-translate-y-2'} border-0 bg-transparent p-0"
       onMouseEnter={onMouseEnter}
       onClick={onClick}
     >
@@ -25,7 +27,7 @@ export default function ArtistCard({
             <img
               src={artist.image_url}
               alt={artist.name}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+              className="h-full w-full object-cover transition-transform duration-700 ${disableHover ? ` ` : 'group-hover:scale-110'}"
             />
           ) : (
             <div className="h-full w-full bg-slate-800 flex items-center justify-center">
