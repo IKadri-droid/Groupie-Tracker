@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useArtists, ArtistDialog, type Artist } from "@/features/artists";
-import { Card, CardContent } from "@/shared/components/ui/card";
+import {
+  useArtists,
+  ArtistDialog,
+  ArtistCard,
+  type Artist,
+} from "@/features/artists";
 import { useState, useEffect, useRef } from "react";
 
 export const Route = createFileRoute("/")({
@@ -108,60 +112,16 @@ function App() {
           onMouseLeave={() => setCurrentColor(null)}
         >
           {artists.map((artist) => (
-            <Card
+            <ArtistCard
               key={artist.id}
-              className="group relative h-96 overflow-hidden rounded-2xl cursor-pointer shadow-2xl transition-all hover:-translate-y-2 border-0 bg-transparent p-0"
-              onMouseEnter={() => {
-                setCurrentColor(artist.color ?? null);
-              }}
+              artist={artist}
+              onMouseEnter={() => setCurrentColor(artist.color ?? null)}
               onClick={() => {
                 setSelectedArtist(artist);
                 setIsDialogOpen(true);
               }}
-            >
-              <CardContent className="p-0 h-full w-full relative">
-                {/* Image de fond */}
-                <div className="absolute inset-0">
-                  {artist.image_url ? (
-                    <img
-                      src={artist.image_url}
-                      alt={artist.name}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-slate-800 flex items-center justify-center">
-                      <span className="text-6xl">🎵</span>
-                    </div>
-                  )}
-                  {/* Overlay dégradé */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-                </div>
-
-                {/* Contenu */}
-                <div className="absolute inset-0 p-6 flex flex-col justify-end translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                  <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-md">
-                    {artist.name}
-                  </h2>
-                  <div className="space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-                    <p className="text-pink-400 font-medium tracking-wide uppercase text-sm">
-                      {artist.genre}
-                    </p>
-                    <p className="text-slate-300 text-sm">
-                      Dernier album : {artist.year}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            />
           ))}
-        </div>
-      )}
-
-      {/* Message si aucun artiste */}
-      {!isLoading && !error && artists.length === 0 && (
-        <div className="max-w-4xl mx-auto text-center py-12 text-slate-400">
-          <p className="text-2xl mb-2">📭</p>
-          <p>Aucun artiste trouvé</p>
         </div>
       )}
 
