@@ -43,7 +43,7 @@ func HandleArtists(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllArtists(w http.ResponseWriter, r *http.Request) {
-	rows, err := config.DB.Query("SELECT id, name, genre, formation_year, image_url, color FROM artists ORDER BY id")
+	rows, err := config.DB.Query("SELECT id, name, genre, date_last_album, image_url, color FROM artists ORDER BY id")
 	if err != nil {
 		http.Error(w, "Erreur base de données: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -83,7 +83,7 @@ func getArtistByID(w http.ResponseWriter, r *http.Request, idStr string) {
 	var a models.Artist
 	var imageURL sql.NullString
 	var color sql.NullString
-	err = config.DB.QueryRow("SELECT id, name, genre, formation_year, image_url, color FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color)
+	err = config.DB.QueryRow("SELECT id, name, genre, date_last_album, image_url, color FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color)
 	if err != nil {
 		http.Error(w, "Artiste non trouvé", http.StatusNotFound)
 		return
@@ -106,7 +106,7 @@ func createArtist(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := config.DB.QueryRow(
-		"INSERT INTO artists (name, genre, formation_year, image_url, color) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO artists (name, genre, date_last_album, image_url, color) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		newArtist.Name, newArtist.Genre, newArtist.Year, newArtist.ImageURL, newArtist.Color,
 	).Scan(&newArtist.ID)
 
@@ -133,7 +133,7 @@ func updateArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 	}
 	updatedArtist.ID = id
 
-	res, err := config.DB.Exec("UPDATE artists SET name=$1, genre=$2, formation_year=$3, image_url=$4, color=$5 WHERE id=$6",
+	res, err := config.DB.Exec("UPDATE artists SET name=$1, genre=$2, date_last_album=$3, image_url=$4, color=$5 WHERE id=$6",
 		updatedArtist.Name, updatedArtist.Genre, updatedArtist.Year, updatedArtist.ImageURL, updatedArtist.Color, id)
 	if err != nil {
 		http.Error(w, "Erreur mise à jour", http.StatusInternalServerError)
