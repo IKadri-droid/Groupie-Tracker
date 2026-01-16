@@ -14,7 +14,6 @@ import { Button } from "@/shared/components/ui/button";
 import { Slider } from "@/shared/components/ui/slider";
 import { Play, Pause } from "lucide-react";
 import { useRef, useState } from "react";
-import { ConcertList } from "@/features/concerts";
 
 interface Props {
   isDialogOpen: boolean;
@@ -137,9 +136,7 @@ export default function ArtistDialog({
           {/* prochain concert */}
           <div className="p-4 flex flex-col items-center">
             <h1 className="mb-2">Prochain concert</h1>
-            <div className="font-extralight text-lg">
-              <ConcertList artistName={selectedArtist?.name || ""} />
-            </div>
+            <div className="font-extralight text-lg"></div>
           </div>
         </div>
       </DialogContent>
