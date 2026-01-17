@@ -2,7 +2,7 @@
 // Ce hook gère automatiquement le cache, le loading et les erreurs
 
 import { useQuery } from '@tanstack/react-query'
-import { getArtists } from '../api/artistsApi'
+import { getArtists, updateArtist } from '../api/artistsApi'
 import type { Artist } from '../types/artist.types'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createArtist, deleteArtist } from '../api/artistsApi'
@@ -40,6 +40,18 @@ export function useDeleteArtist() {
     
     return useMutation({
         mutationFn: deleteArtist,
+        onSuccess: () => {
+            // Rafraîchit la liste des artistes après création
+            queryClient.invalidateQueries({ queryKey: ['artists'] })
+        },
+    })
+}
+
+export function useUpdateArtist() {
+    const queryClient = useQueryClient()
+    
+    return useMutation({
+        mutationFn: ({ id, artist }: {  id: number,artist: Artist }) => updateArtist(id, artist),
         onSuccess: () => {
             // Rafraîchit la liste des artistes après création
             queryClient.invalidateQueries({ queryKey: ['artists'] })

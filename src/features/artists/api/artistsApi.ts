@@ -66,3 +66,18 @@ export async function deleteArtist(id:number){
     })
     return response.json()
 }
+
+export async function updateArtist(id:number, artist:Artist){
+    /*Omit<Artist, 'id'> c'est Le type Artist mais sans le champ id (car il sera généré par le backend)*/
+    const response = await fetch(`${API_BASE_URL}/artists/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(artist),
+    })
+    if (!response.ok) {
+        throw new Error('Erreur lors de la création de l\'artiste')
+    }
+    return response.json()
+}

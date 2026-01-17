@@ -16,7 +16,7 @@ export default function ArtistCard({
 }: ArtistCardProps) {
   return (
     <Card
-      className="group relative h-96 overflow-hidden rounded-2xl cursor-pointer shadow-2xl transition-all ${disableHover ? ` ` : 'hover:-translate-y-2'} border-0 bg-transparent p-0"
+      className={`group relative h-96 overflow-hidden rounded-2xl cursor-pointer shadow-2xl transition-all ${disableHover ? ` ` : "hover:-translate-y-2"} border-0 bg-transparent p-0`}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
     >
@@ -27,7 +27,7 @@ export default function ArtistCard({
             <img
               src={artist.image_url}
               alt={artist.name}
-              className="h-full w-full object-cover transition-transform duration-700 ${disableHover ? ` ` : 'group-hover:scale-110'}"
+              className={`h-full w-full object-cover transition-transform duration-700 ${disableHover ? ` ` : "group-hover:scale-110"}`}
             />
           ) : (
             <div className="h-full w-full bg-slate-800 flex items-center justify-center">

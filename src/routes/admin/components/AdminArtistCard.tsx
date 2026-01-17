@@ -1,8 +1,12 @@
-import { ArtistCard } from "@/features/artists";
+import {
+  ArtistCard,
+  ArtistFormDialog,
+  useDeleteArtist,
+} from "@/features/artists";
 import type { Artist } from "@/features/artists";
 import { Button } from "@/shared/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
-import { useDeleteArtist } from "@/features/artists";
+import { useState } from "react";
 
 interface Prop {
   artist: Artist;
@@ -10,6 +14,8 @@ interface Prop {
 
 export default function AdminArtistCard({ artist }: Prop) {
   const deleteArtistMutation = useDeleteArtist();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   return (
     <div className="relative group ">
       <ArtistCard
@@ -19,18 +25,20 @@ export default function AdminArtistCard({ artist }: Prop) {
         onClick={() => {}}
       />
       <div className="absolute  top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ">
+        {/*EDIT BUTTON*/}
         <Button
           size="icon"
           variant="secondary"
           onClick={(e) => {
+            setIsEditDialogOpen(true);
             e.stopPropagation(); // Empêche le onClick de la carte
-            // TODO: Modifier
           }}
         >
           {" "}
           <Pencil className="h-4 w-4" />
         </Button>
 
+        {/*DELETE BUTTON*/}
         <Button
           size="icon"
           variant="destructive"
@@ -42,6 +50,11 @@ export default function AdminArtistCard({ artist }: Prop) {
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
+      <ArtistFormDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        artist={artist}
+      />
     </div>
   );
 }

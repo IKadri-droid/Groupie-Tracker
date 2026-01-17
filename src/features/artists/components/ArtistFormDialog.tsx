@@ -7,19 +7,23 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
-import { useState } from "react";
-import { useCreateArtist } from "../hooks/useArtists";
+import { useState, useEffect } from "react";
+import { useCreateArtist, useUpdateArtist } from "../hooks/useArtists";
+import type { Artist } from "../types/artist.types";
 
-interface CreateArtistDialogProps {
+interface ArtistFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  artist?: Artist;
 }
 
-export default function CreateArtistDialog({
+export default function ArtistFormDialog({
   open,
   onOpenChange,
-}: CreateArtistDialogProps) {
+  artist,
+}: ArtistFormDialogProps) {
   const createArtistMutation = useCreateArtist();
+  const updateArtistMutation = useUpdateArtist();
   const [newArtist, setNewArtist] = useState({
     name: "",
     genre: "",
@@ -28,6 +32,19 @@ export default function CreateArtistDialog({
     color: "",
     next_concert: "",
   });
+
+  useEffect(() => {
+    if (artist) {
+      setNewArtist({
+        name: artist.name,
+        genre: artist.genre,
+        year: artist.year,
+        image_url: artist.image_url ?? "",
+        color: artist.color ?? "",
+        next_concert: artist.next_concert ?? "",
+      });
+    }
+  }, [artist]);
   const isFormValid = () => {
     return (
       newArtist.name.trim() !== "" &&
@@ -37,11 +54,29 @@ export default function CreateArtistDialog({
     );
   };
 
+  const resetForm = () => {
+    setNewArtist({
+      name: "",
+      genre: "",
+      year: 0,
+      image_url: "",
+      color: "",
+      next_concert: "",
+    });
+  };
+
+  const handleSuccess = () => {
+    onOpenChange(false);
+    resetForm(); // une fonction qui vide le state
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Ajouter un artiste</DialogTitle>
+          <DialogTitle>
+            {artist ? "Modifier l'artiste" : "Ajouter un artiste"}
+          </DialogTitle>
         </DialogHeader>
         {/* Le formulaire ira ici */}
         <Label htmlFor="name">
@@ -108,23 +143,22 @@ export default function CreateArtistDialog({
           className="mt-4"
           disabled={!isFormValid()}
           onClick={() => {
-            createArtistMutation.mutate(newArtist, {
-              onSuccess: () => {
-                onOpenChange(false); // Ferme le dialog
-                // Réinitialise le formulaire
-                setNewArtist({
-                  name: "",
-                  genre: "",
-                  year: 0,
-                  image_url: "",
-                  color: "",
-                  next_concert: "",
-                });
-              },
-            });
+            if (artist) {
+              updateArtistMutation.mutate(
+                {
+                  id: artist.id,
+                  artist: { ...newArtist, id: artist.id },
+                },
+                { onSuccess: handleSuccess },
+              );
+            } else {
+              createArtistMutation.mutate(newArtist, {
+                onSuccess: handleSuccess,
+              });
+            }
           }}
         >
-          Créer
+          {artist ? "Enregistrer" : "Créer"}
         </Button>
       </DialogContent>
     </Dialog>
