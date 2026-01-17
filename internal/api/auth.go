@@ -43,10 +43,17 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	// On prépare une réponse qui contient tout ce que le Frontend veut
+	// 1. On appelle le service pour créer le VRAI badge
+	token, err := services.GenerateToken(foundUser.Email)
+	if err != nil {
+		http.Error(w, "Erreur lors de la création du badge", http.StatusInternalServerError)
+		return
+	}
+
+	// 2. On met le 'token' dans la réponse
 	response := map[string]interface{}{
 		"message": "Bienvenue !",
-		"token":   "un-faux-token-pour-l-instant", // On verra les vrais JWT plus tard
+		"token":   token, // <-- On utilise la variable ici !
 		"user": map[string]string{
 			"email": foundUser.Email,
 		},
