@@ -16,6 +16,10 @@ func main() {
 	}
 	defer config.DB.Close()
 
+	if err := config.RunMigrations(); err != nil {
+		log.Fatal("Error Migrations", err)
+	}
+
 	// Enregistrer les routes
 	http.HandleFunc("/api/artists", api.HandleArtists)
 	http.HandleFunc("/api/artists/", api.HandleArtists)
