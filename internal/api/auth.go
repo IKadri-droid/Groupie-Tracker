@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"groupie/internal/models"
@@ -28,15 +29,25 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Simulation : on accepte n'importe quel email avec le mot de passe "password123"
-	if req.Password == "password123" {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
-			"token": "ton_super_token_jwt_ici",
-			"user":  req.Email,
-		})
-	} else {
+	// 1. On demande au dossier 'models' de nous trouver l'utilisateur par son mail
+	foundUser, err := models.GetUserByEmail(req.Email)
+
+	// 2. Si on a une erreur (utilisateur non trouvé), on s'arrête là
+	if err != nil {
 		http.Error(w, "Identifiants invalides", http.StatusUnauthorized)
+		return
 	}
+	match := services.CheckPasswordHash(req.Password, foundUser.Password)
+	if !match {
+		http.Error(w, "identifiants invalides", http.StatusUnauthorized)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).
+		Encode(map[string]string{
+			"message": "Bienvenue !",
+		},
+		)
 }
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +75,13 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	user.Password = hashedPassword
 
 	if err := models.CreateUser(&user); err != nil {
-		http.Error(w, "Erreur 500", http.StatusInternalServerError)
+		// 1. D'abord, on écrit dans NOTRE terminal (les logs)
+		log.Println("Hé Chef, y a une erreur :", err)
+
+		// 2. Ensuite, on envoie le message d'erreur au client
+		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+
+		// 3. Et on quitte la fonction
 		return
 	}
 
