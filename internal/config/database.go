@@ -42,3 +42,15 @@ func InitDB() error {
 
 	return nil
 }
+
+func RunMigrations() error {
+	content, err := os.ReadFile("migrations/001_create_users_table.sql")
+	if err != nil {
+		return err
+	}
+	_, err = DB.Exec(string(content))
+	if err != nil {
+		return err
+	}
+	return nil
+}
