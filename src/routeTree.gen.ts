@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfilRoute = ProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
+  '/register': typeof RegisterRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
+  '/register': typeof RegisterRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/admin': typeof AdminIndexRoute
 }
@@ -60,19 +68,33 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/profil': typeof ProfilRoute
+  '/register': typeof RegisterRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/profil' | '/demo/tanstack-query' | '/admin'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/profil'
+    | '/register'
+    | '/demo/tanstack-query'
+    | '/admin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/profil' | '/demo/tanstack-query' | '/admin'
+  to:
+    | '/'
+    | '/login'
+    | '/profil'
+    | '/register'
+    | '/demo/tanstack-query'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/login'
     | '/profil'
+    | '/register'
     | '/demo/tanstack-query'
     | '/admin/'
   fileRoutesById: FileRoutesById
@@ -81,12 +103,20 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   ProfilRoute: typeof ProfilRoute
+  RegisterRoute: typeof RegisterRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profil': {
       id: '/profil'
       path: '/profil'
@@ -129,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   ProfilRoute: ProfilRoute,
+  RegisterRoute: RegisterRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
