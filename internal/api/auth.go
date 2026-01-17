@@ -43,11 +43,17 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).
-		Encode(map[string]string{
-			"message": "Bienvenue !",
+	// On prépare une réponse qui contient tout ce que le Frontend veut
+	response := map[string]interface{}{
+		"message": "Bienvenue !",
+		"token":   "un-faux-token-pour-l-instant", // On verra les vrais JWT plus tard
+		"user": map[string]string{
+			"email": foundUser.Email,
 		},
-		)
+	}
+
+	// On envoie cet objet complet
+	json.NewEncoder(w).Encode(response)
 }
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
