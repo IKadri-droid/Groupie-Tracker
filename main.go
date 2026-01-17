@@ -27,6 +27,7 @@ func main() {
 	http.HandleFunc("/api/deezer/search", api.HandleDeezerSearch)
 	http.HandleFunc("/api/deezer/albums", api.HandleDeezerAlbums)
 	http.HandleFunc("/api/deezer/top-tracks", api.HandleDeezerTopTracks)
+	http.HandleFunc("/api/register", api.HandleRegister)
 
 	port := ":8080"
 	fmt.Println("🚀 REST API Server started on http://localhost" + port)
