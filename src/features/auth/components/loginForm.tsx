@@ -43,8 +43,8 @@ export function LoginForm() {
     mutationFn: loginUser,
     onSuccess: (data) => {
       // 1. On enregistre dans l'état global
-      setLogin({ email: data.user.email }, data.token); // Assuming data.user is an object with an email property
-      toast.success("Connexion réussie ! Bienvenue " + data.user.email); // Display user's email
+      setLogin(data.user, data.token);
+      toast.success("Connexion réussie ! Bienvenue " + data.user.email);
       navigate({ to: "/" }); //redirige vers page d'accueil
     },
     onError: (error: Error) => {

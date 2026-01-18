@@ -40,6 +40,19 @@ export default function Header() {
               <span className="flex items-center gap-2 uppercase">Profile</span>
             </Link>
 
+            {user.role === "admin" && (
+              <Link
+                to="/admin"
+                className="relative px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 hover:text-red-400 text-slate-400"
+                activeProps={{
+                  className:
+                    "bg-red-600 text-white shadow-lg hover:text-white font-semibold",
+                }}
+              >
+                <span className="flex items-center gap-2 uppercase">Admin</span>
+              </Link>
+            )}
+
             <button
               onClick={handleLogout}
               className="px-6 py-2.5 rounded-full text-sm font-medium text-slate-400 hover:text-red-400 transition-colors uppercase"

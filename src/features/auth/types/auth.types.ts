@@ -1,6 +1,7 @@
 // Auth types
 export interface User {
     email: string
+    role: string
     // Tu pourras ajouter 'id', 'name', 'avatarUrl' plus tard ici !
 }
 
@@ -17,10 +18,10 @@ export interface LoginResponse {
 export interface RegisterCredentials {
     email: string
     password: string
-    username:string
+    username: string
     captchaToken: string  // ⬅️ Ajoute cette ligne
 }
 
 export interface RegisterResponse {
-    message:string
+    message: string
 }

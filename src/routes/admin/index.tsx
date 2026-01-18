@@ -1,12 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useArtists, ArtistFormDialog } from "@/features/artists";
 import { Button } from "@/shared/components/ui/button";
 import { Plus } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import AdminArtistCard from "./components/AdminArtistCard";
+import { useAuthStore } from "@/features/auth";
 
 export const Route = createFileRoute("/admin/")({
+  beforeLoad: () => {
+    const { user, token } = useAuthStore.getState();
+    if (!token || user?.role !== 'admin') {
+      throw redirect({
+        to: "/",
+      });
+    }
+  },
   component: RouteComponent,
 });
 
