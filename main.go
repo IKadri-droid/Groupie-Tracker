@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-
 	"groupie/internal/api"
 	"groupie/internal/config"
+	"log"
+	"net/http"
 )
 
 func main() {
+	//charge les variable du .env
+	config.LoadEnv()
 	// Initialiser la base de données
 	if err := config.InitDB(); err != nil {
 		log.Fatal("❌ Error initializing database:", err)

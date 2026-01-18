@@ -64,6 +64,14 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// Structure pour recevoir les données d'inscription avec le captcha
+type RegisterRequest struct {
+	Email        string `json:"email"`
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+	CaptchaToken string `json:"captchaToken"`
+}
+
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
 	EnableCORS(w)
 	if r.Method == "OPTIONS" {
@@ -74,13 +82,26 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
-
-	var user models.User
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	//CAPTCHA
+	var req RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Données invalides", http.StatusBadRequest)
 		return
 	}
-
+	// Vérifier le captcha
+	isValid, err := services.VerifyRecaptcha(req.CaptchaToken)
+	if err != nil || !isValid {
+		log.Println("Captcha verification failed:", err)
+		http.Error(w, "Vérification captcha échouée", http.StatusBadRequest)
+		return
+	}
+	// Créer l'objet User à partir de la requête
+	user := models.User{
+		Email:    req.Email,
+		Username: req.Username,
+		Password: req.Password,
+	}
+	//FIN CAPTCHA
 	hashedPassword, err := services.HashPassword(user.Password)
 	if err != nil {
 		http.Error(w, "Erreur lors du hashage", http.StatusInternalServerError)
