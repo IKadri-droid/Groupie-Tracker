@@ -11,6 +11,7 @@ type User struct {
 	Username string    `json:"username"`
 	Password string    `json:"password"`
 	CreateAt time.Time `json:"Date de création"`
+	Role     string    `json:"Role"`
 }
 
 func CreateUser(user *User) error {
@@ -26,7 +27,7 @@ func CreateUser(user *User) error {
 func GetUserByEmail(email string) (*User, error) {
 	var user User
 
-	query := "SELECT id, email, username, password, created_at FROM users WHERE email = $1"
+	query := "SELECT id, email, username, password, role, created_at FROM users WHERE email = $1"
 	// 2. On exécute et on scanne une SEULE fois
 	// On met tous les champs dans l'ordre du SELECT
 	err := config.DB.QueryRow(query, email).Scan(
@@ -34,6 +35,7 @@ func GetUserByEmail(email string) (*User, error) {
 		&user.Email,
 		&user.Username,
 		&user.Password,
+		&user.Role,
 		&user.CreateAt,
 	)
 	// 3. Il faut ABSOLUMENT vérifier l'erreur ici

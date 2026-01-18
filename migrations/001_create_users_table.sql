@@ -4,4 +4,5 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT,                      -- Le pseudo
     password TEXT NOT NULL,             -- On stockera le hash ici (c'est du texte)
     created_at TIMESTAMP DEFAULT NOW()  -- La date de création, remplie automatiquement à "maintenant"
-);
+    role TEXT DEFAULT 'user'            -- Par défaut, tout le monde est un utilisateur normal
+);git 

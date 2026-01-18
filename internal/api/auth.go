@@ -56,6 +56,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		"token":   token, // <-- On utilise la variable ici !
 		"user": map[string]string{
 			"email": foundUser.Email,
+			"role":  foundUser.Role,
 		},
 	}
 
