@@ -24,6 +24,8 @@ import { useNavigate, Link } from "@tanstack/react-router";
 import { registerUser } from "@/features/auth";
 import { toast } from "sonner";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 // Schéma de validation Zod
 const registerSchema = z.object({
   email: z.string().email({ message: "Email invalide" }),
@@ -37,6 +39,7 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 export function RegisterForm() {
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate(); // 2. Initialise le hook navigate
   const { executeRecaptcha } = useGoogleReCaptcha();
   // La mutation TanStack Query
@@ -110,11 +113,26 @@ export function RegisterForm() {
                   <FormItem>
                     <FormLabel>Mot de passe</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <Eye className="h-4 w-4" />
+                          ) : (
+                            <EyeOff className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

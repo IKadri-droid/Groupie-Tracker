@@ -23,6 +23,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { loginUser, useAuthStore } from "@/features/auth";
 import { toast } from "sonner";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 // Schéma de validation Zod
 const loginSchema = z.object({
   email: z.string().email({ message: "Email invalide" }),
@@ -33,6 +35,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate(); // 2. Initialise le hook navigate
   const setLogin = useAuthStore((state) => state.setLogin);
   // La mutation TanStack Query
@@ -95,11 +98,26 @@ export function LoginForm() {
                   <FormItem>
                     <FormLabel>Mot de passe</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <Eye className="h-4 w-4" />
+                          ) : (
+                            <EyeOff className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
