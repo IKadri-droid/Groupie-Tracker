@@ -22,26 +22,25 @@ export default function AdminArtistCard({ artist }: Prop) {
         key={artist.id}
         artist={artist}
         disableHover={true}
-        onClick={() => {}}
+        onClick={() => { }}
       />
       <div className="absolute  top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ">
         {/*EDIT BUTTON*/}
         <Button
           size="icon"
-          variant="secondary"
+          className="bg-white/10 border-white/20 backdrop-blur-md hover:bg-white/20 text-white border transition-all"
           onClick={(e) => {
             setIsEditDialogOpen(true);
-            e.stopPropagation(); // Empêche le onClick de la carte
+            e.stopPropagation();
           }}
         >
-          {" "}
           <Pencil className="h-4 w-4" />
         </Button>
 
         {/*DELETE BUTTON*/}
         <Button
           size="icon"
-          variant="destructive"
+          className="bg-red-500/20 border-red-500/50 backdrop-blur-md hover:bg-red-500/40 text-red-200 border transition-all"
           onClick={(e) => {
             e.stopPropagation();
             deleteArtistMutation.mutate(artist.id);
