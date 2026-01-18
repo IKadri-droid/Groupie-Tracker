@@ -64,11 +64,13 @@ export function LoginForm() {
     mutation.mutate(data);
   }
   return (
-    <div className="flex items-center justify-center min-h-[80vh] p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a]">
+      <Card className="w-full max-w-md bg-white/10 border-white/20 backdrop-blur-xl text-white shadow-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-slate-50 to-slate-400 bg-clip-text text-transparent">
+            Connexion
+          </CardTitle>
+          <CardDescription className="text-slate-400">
             Entrez vos identifiants pour accéder à Groupie Tracker.
           </CardDescription>
         </CardHeader>
@@ -81,11 +83,15 @@ export function LoginForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-slate-200">Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="exemple@mail.com" {...field} />
+                      <Input
+                        className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:bg-white/10 focus:border-white/20 transition-all"
+                        placeholder="exemple@mail.com"
+                        {...field}
+                      />
                     </FormControl>
-                    <FormMessage /> {/* Les erreurs Zod s'affichent ici ! */}
+                    <FormMessage className="text-pink-400" />
                   </FormItem>
                 )}
               />
@@ -96,10 +102,13 @@ export function LoginForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mot de passe</FormLabel>
+                    <FormLabel className="text-slate-200">
+                      Mot de passe
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
+                          className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:bg-white/10 focus:border-white/20 transition-all pr-10"
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
                           {...field}
@@ -108,25 +117,25 @@ export function LoginForm() {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                          className="absolute right-0 top-0 h-full px-3 hover:bg-transparent text-slate-400 hover:text-white transition-colors"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? (
-                            <Eye className="h-4 w-4" />
-                          ) : (
                             <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
                           )}
                         </Button>
                       </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-pink-400" />
                   </FormItem>
                 )}
               />
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-[#1e293b] hover:bg-[#2d3a4f] text-white font-medium py-6 rounded-xl border border-white/10 transition-all active:scale-[0.98] shadow-xl"
                 disabled={mutation.isPending}
               >
                 {mutation.isPending ? "Connexion..." : "Se connecter"}
@@ -134,10 +143,13 @@ export function LoginForm() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
+        <CardFooter className="flex justify-center border-t border-white/5 pt-6">
+          <p className="text-sm text-slate-500">
             Pas encore de compte ?{" "}
-            <Link to="/register" className="underline">
+            <Link
+              to="/register"
+              className="text-slate-300 hover:text-white font-medium transition-colors underline underline-offset-4"
+            >
               Créer un compte
             </Link>
           </p>
