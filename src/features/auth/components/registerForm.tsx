@@ -21,8 +21,9 @@ import {
 } from "@/shared/components/ui/card";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, Link } from "@tanstack/react-router";
-import { registerUser, useAuthStore } from "@/features/auth";
+import { registerUser } from "@/features/auth";
 import { toast } from "sonner";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 // Schéma de validation Zod
 const registerSchema = z.object({
   email: z.string().email({ message: "Email invalide" }),
@@ -37,6 +38,7 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 export function RegisterForm() {
   const navigate = useNavigate(); // 2. Initialise le hook navigate
+  const { executeRecaptcha } = useGoogleReCaptcha();
   // La mutation TanStack Query
   const mutation = useMutation({
     mutationFn: registerUser,
@@ -58,8 +60,20 @@ export function RegisterForm() {
     },
   });
 
-  function onSubmit(data: RegisterFormValues) {
-    mutation.mutate(data);
+  async function onSubmit(data: RegisterFormValues) {
+    if (!executeRecaptcha) {
+      toast.error("reCAPTCHA non disponible");
+      return;
+    }
+
+    // Générer le token captcha
+    const captchaToken = await executeRecaptcha("register");
+
+    // Ajouter le token aux données
+    mutation.mutate({
+      ...data,
+      captchaToken,
+    });
   }
   return (
     <div className="flex items-center justify-center min-h-[80vh] p-4">

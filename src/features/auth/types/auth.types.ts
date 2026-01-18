@@ -18,6 +18,7 @@ export interface RegisterCredentials {
     email: string
     password: string
     username:string
+    captchaToken: string  // ⬅️ Ajoute cette ligne
 }
 
 export interface RegisterResponse {
