@@ -1,6 +1,7 @@
 // Auth types
 export interface User {
     email: string
+    username?: string
     role: string
     // Tu pourras ajouter 'id', 'name', 'avatarUrl' plus tard ici !
 }

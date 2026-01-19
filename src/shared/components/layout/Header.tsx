@@ -40,15 +40,6 @@ export default function Header() {
               <span className="flex items-center gap-2 uppercase">Profile</span>
             </Link>
 
-<<<<<<< Updated upstream
-            {user.role === "admin" && (
-              <Link
-                to="/admin"
-                className="relative px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 hover:text-red-400 text-slate-400"
-                activeProps={{
-                  className:
-                    "bg-red-600 text-white shadow-lg hover:text-white font-semibold",
-=======
             {user.email === "AdminGroupie@groupie.com" && (
               <Link
                 to="/admin"
@@ -56,7 +47,6 @@ export default function Header() {
                 activeProps={{
                   className:
                     "bg-white text-black shadow-lg hover:text-black font-semibold",
->>>>>>> Stashed changes
                 }}
               >
                 <span className="flex items-center gap-2 uppercase">Admin</span>
