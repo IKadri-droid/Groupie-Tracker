@@ -26,6 +26,31 @@ import { toast } from "sonner";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { PasswordStrength } from "./passwordStrenght";
+
+function getPasswordStrength(password: string): number {
+  var score = 0;
+  if (password.length > 0) score++;
+  //test la longueur
+  if (password.length > 8) score++;
+  if (
+    (/\d/.test(password) ||
+      /[A-Z]/.test(password) ||
+      /[^A-Za-z0-9]/.test(password)) &&
+    password.length < 8
+  ) {
+    score--;
+  }
+  //test si contient chiffre
+  if (/\d/.test(password)) score++;
+  //test si contient majuscule
+  if (/[A-Z]/.test(password)) score++;
+  //test si contient caractères spécial
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  return score;
+}
+
 // Schéma de validation Zod
 const registerSchema = z.object({
   email: z.string().email({ message: "Email invalide" }),
@@ -40,6 +65,7 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const navigate = useNavigate(); // 2. Initialise le hook navigate
   const { executeRecaptcha } = useGoogleReCaptcha();
   // La mutation TanStack Query
@@ -127,6 +153,12 @@ export function RegisterForm() {
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
                           {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            setPasswordStrength(
+                              getPasswordStrength(e.target.value),
+                            );
+                          }}
                         />
                         <Button
                           type="button"
@@ -143,6 +175,12 @@ export function RegisterForm() {
                         </Button>
                       </div>
                     </FormControl>
+
+                    {/*Jauge de Niveau de sécurité*/}
+                    <PasswordStrength
+                      strength={passwordStrength}
+                      value={form.watch("password")}
+                    />
                     <FormMessage className="text-pink-400" />
                   </FormItem>
                 )}
