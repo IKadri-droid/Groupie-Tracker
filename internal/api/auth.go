@@ -44,7 +44,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	// 1. On appelle le service pour créer le VRAI badge
-	token, err := services.GenerateToken(foundUser.Email)
+	token, err := services.GenerateToken(foundUser.Email, foundUser.Role)
 	if err != nil {
 		http.Error(w, "Erreur lors de la création du badge", http.StatusInternalServerError)
 		return
@@ -56,6 +56,7 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		"token":   token, // <-- On utilise la variable ici !
 		"user": map[string]string{
 			"email": foundUser.Email,
+			"role":  foundUser.Role,
 		},
 	}
 
