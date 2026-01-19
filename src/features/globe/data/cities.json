@@ -1,0 +1,22 @@
+{
+  "paris, france": { "lat": 48.8566, "lng": 2.3522 },
+  "london, uk": { "lat": 51.5074, "lng": -0.1278 },
+  "berlin, germany": { "lat": 52.52, "lng": 13.405 },
+  "madrid, spain": { "lat": 40.4168, "lng": -3.7038 },
+  "rome, italy": { "lat": 41.9028, "lng": 12.4964 },
+  "amsterdam, netherlands": { "lat": 52.3676, "lng": 4.9041 },
+  "dublin, ireland": { "lat": 53.3498, "lng": -6.2603 },
+
+  "new york, usa": { "lat": 40.7128, "lng": -74.006 },
+  "los angeles, usa": { "lat": 34.0522, "lng": -118.2437 },
+  "chicago, usa": { "lat": 41.8781, "lng": -87.6298 },
+  "toronto, canada": { "lat": 43.651, "lng": -79.347 },
+  "mexico city, mexico": { "lat": 19.4326, "lng": -99.1332 },
+
+  "sao paulo, brazil": { "lat": -23.5505, "lng": -46.6333 },
+  "buenos aires, argentina": { "lat": -34.6037, "lng": -58.3816 },
+
+  "tokyo, japan": { "lat": 35.6762, "lng": 139.6503 },
+  "sydney, australia": { "lat": -33.8688, "lng": 151.2093 },
+  "auckland, new zealand": { "lat": -36.8485, "lng": 174.7633 }
+}
