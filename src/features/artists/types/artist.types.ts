@@ -7,6 +7,14 @@ export interface Artist {
     genre: string   // Le genre musical
     year: number    // L'année de création
     image_url?: string // L'URL de l'image de l'artiste
-    color?: string     // La couleur dominante de l'artiste
-    next_concert?: string // Le prochain concert de l'artiste   
+    color?: string     // La couleur dominante de l'artiste 
+    concerts?: Concert[] // La liste des concerts de l'artiste
+}
+
+export interface Concert {
+  id: number;
+  location: string;
+  date: string;
+  latitude: number;
+  longitude: number;
 }

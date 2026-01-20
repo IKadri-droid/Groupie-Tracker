@@ -30,7 +30,6 @@ export default function ArtistFormDialog({
     year: 0,
     image_url: "",
     color: "",
-    next_concert: "",
   });
 
   useEffect(() => {
@@ -41,7 +40,6 @@ export default function ArtistFormDialog({
         year: artist.year,
         image_url: artist.image_url ?? "",
         color: artist.color ?? "",
-        next_concert: artist.next_concert ?? "",
       });
     }
   }, [artist]);
@@ -61,7 +59,6 @@ export default function ArtistFormDialog({
       year: 0,
       image_url: "",
       color: "",
-      next_concert: "",
     });
   };
 
@@ -130,15 +127,17 @@ export default function ArtistFormDialog({
             setNewArtist({ ...newArtist, color: e.target.value })
           }
         />
+        {/* à refaire
         <Label htmlFor="next_concert">Prochain concerts</Label>
         <Input
           placeholder="4 janvier Zénith de Lille"
           id="next_concert"
-          value={newArtist.next_concert}
+          value={""}
           onChange={(e) =>
             setNewArtist({ ...newArtist, next_concert: e.target.value })
           }
         />
+        */}
         <Button
           className="mt-4"
           disabled={!isFormValid()}

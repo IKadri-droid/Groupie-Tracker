@@ -137,7 +137,7 @@ export default function ArtistDialog({
           <div className="p-4 flex flex-col items-center">
             <h1 className="mb-2">Prochain concert</h1>
             <div className="font-extralight text-lg">
-              {selectedArtist?.next_concert || "Aucun concert planifié"}
+              {"Aucun concert planifié"}
             </div>
           </div>
         </div>
