@@ -54,7 +54,7 @@ export default function ArtistDialog({
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogContent className="min-h-152 w-full rounded-3xl sm:!max-w-4xl backdrop-blur-lg bg-white/30 dark:bg-black/30 text-white [&>button]:hidden">
+      <DialogContent className="overflow-hidden min-h-152 w-full rounded-3xl sm:!max-w-4xl bg-gradient-to-br from-white/15 via-white/5 to-white/10 border border-white/40 backdrop-blur-xl shadow-[inset_0_2px_3px_rgba(255,255,255,0.6),0_8px_32px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.1)] text-white [&>button]:hidden ">
         <DialogHeader className="flex gap-4">
           {selectedArtist?.image_url ? (
             <img
