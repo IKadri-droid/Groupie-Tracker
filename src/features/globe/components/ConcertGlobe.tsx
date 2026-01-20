@@ -1,14 +1,17 @@
 import Globe, { type GlobeMethods } from "react-globe.gl";
-import type { Artist } from "@/features/artists";
-import { getCoordinates } from "../data/cityCoordinates";
 import { useMemo, useRef, useEffect } from "react";
 import * as THREE from "three";
+import type { Artist, Concert } from "@/features/artists";
 
 interface ConcertGlobeProps {
   artists: Artist[]; // Je veux un tableau d'Artist
+  onPointClick?: (artist: Artist) => void;
 }
 
-export default function ConcertGlobe({ artists }: ConcertGlobeProps) {
+export default function ConcertGlobe({
+  artists,
+  onPointClick,
+}: ConcertGlobeProps) {
   // On utilise 'any' pour la ref car les types de react-globe peuvent être capricieux
   // ou GlobeMethods | undefined avec initialisation à undefined
   const globeEl = useRef<GlobeMethods | undefined>(undefined);
@@ -30,22 +33,24 @@ export default function ConcertGlobe({ artists }: ConcertGlobeProps) {
   }, []);
 
   const pointsData = useMemo(() => {
-    return artists
-      .filter((artist) => artist.next_concert)
-      .map((artist) => {
-        const coords = getCoordinates(artist.next_concert!);
-        return {
-          lat: coords.lat,
-          lng: coords.lng,
-          label: `${artist.name} - ${artist.next_concert}`,
-          color: artist.color || "red", // Rouge par défaut comme un pin
-          size: 0.5,
-        };
-      });
+    return artists.flatMap((artist) => {
+      // 1. On vérifie si l'artiste a des concerts, sinon on retourne un tableau vide
+      if (!artist.concerts) return [];
+
+      // 2. On transforme CHAQUE concert de la liste en un point
+      return artist.concerts.map((concert: Concert) => ({
+        lat: concert.latitude, // Plus besoin de getCoordinates !
+        lng: concert.longitude, // C'est direct dans l'objet concert maintenant
+        label: `${artist.name} - ${concert.location}`,
+        color: "red",
+        size: 0.5,
+        artist: artist,
+      }));
+    });
   }, [artists]);
 
   return (
-    <div className="h-[1000px] w-full flex items-center justify-center overflow-hidden">
+    <div className="h-full w-full flex items-center justify-center overflow-hidden">
       <Globe
         ref={globeEl}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
@@ -99,6 +104,11 @@ export default function ConcertGlobe({ artists }: ConcertGlobeProps) {
           }
 
           document.body.style.cursor = obj ? "pointer" : "default";
+        }}
+        onObjectClick={(obj: any) => {
+          if (onPointClick && obj.artist) {
+            onPointClick(obj.artist);
+          }
         }}
         onGlobeReady={() => {}}
       />
