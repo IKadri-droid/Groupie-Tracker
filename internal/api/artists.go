@@ -43,7 +43,7 @@ func HandleArtists(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllArtists(w http.ResponseWriter, r *http.Request) {
-	rows, err := config.DB.Query("SELECT id, name, genre, date_last_album, image_url, color, next_concert FROM artists ORDER BY id")
+	rows, err := config.DB.Query("SELECT id, name, genre, date_last_album, image_url, color FROM artists ORDER BY id")
 	if err != nil {
 		http.Error(w, "Erreur base de données: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -55,8 +55,7 @@ func getAllArtists(w http.ResponseWriter, r *http.Request) {
 		var a models.Artist
 		var imageURL sql.NullString
 		var color sql.NullString
-		var next_concert sql.NullString
-		if err := rows.Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color, &next_concert); err != nil {
+		if err := rows.Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color); err != nil {
 			continue
 		}
 		if imageURL.Valid {
@@ -65,9 +64,16 @@ func getAllArtists(w http.ResponseWriter, r *http.Request) {
 		if color.Valid {
 			a.Color = color.String
 		}
-		if next_concert.Valid {
-			a.NextConcert = next_concert.String
+
+		// Récupérer les concerts pour cet artiste
+		concerts, err := getConcertsByArtistID(a.ID)
+		if err == nil {
+			a.Concerts = concerts
+		} else {
+			// On ne bloque pas si erreur de récupération des concerts, on init à vide
+			a.Concerts = []models.Concert{}
 		}
+
 		artists = append(artists, a)
 	}
 
@@ -87,8 +93,7 @@ func getArtistByID(w http.ResponseWriter, r *http.Request, idStr string) {
 	var a models.Artist
 	var imageURL sql.NullString
 	var color sql.NullString
-	var next_concert sql.NullString
-	err = config.DB.QueryRow("SELECT id, name, genre, date_last_album, image_url, color, next_concert FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color, &a.NextConcert)
+	err = config.DB.QueryRow("SELECT id, name, genre, date_last_album, image_url, color FROM artists WHERE id = $1", id).Scan(&a.ID, &a.Name, &a.Genre, &a.Year, &imageURL, &color)
 	if err != nil {
 		http.Error(w, "Artiste non trouvé", http.StatusNotFound)
 		return
@@ -99,8 +104,13 @@ func getArtistByID(w http.ResponseWriter, r *http.Request, idStr string) {
 	if color.Valid {
 		a.Color = color.String
 	}
-	if next_concert.Valid {
-		a.NextConcert = next_concert.String
+
+	// Récupérer les concerts
+	concerts, err := getConcertsByArtistID(a.ID)
+	if err == nil {
+		a.Concerts = concerts
+	} else {
+		a.Concerts = []models.Concert{}
 	}
 
 	json.NewEncoder(w).Encode(a)
@@ -114,8 +124,8 @@ func createArtist(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := config.DB.QueryRow(
-		"INSERT INTO artists (name, genre, date_last_album, image_url, color, next_concert) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
-		newArtist.Name, newArtist.Genre, newArtist.Year, newArtist.ImageURL, newArtist.Color, newArtist.NextConcert,
+		"INSERT INTO artists (name, genre, date_last_album, image_url, color) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		newArtist.Name, newArtist.Genre, newArtist.Year, newArtist.ImageURL, newArtist.Color,
 	).Scan(&newArtist.ID)
 
 	if err != nil {
@@ -141,8 +151,8 @@ func updateArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 	}
 	updatedArtist.ID = id
 
-	res, err := config.DB.Exec("UPDATE artists SET name=$1, genre=$2, date_last_album=$3, image_url=$4, color=$5, next_concert=$6 WHERE id=$7",
-		updatedArtist.Name, updatedArtist.Genre, updatedArtist.Year, updatedArtist.ImageURL, updatedArtist.Color, updatedArtist.NextConcert, id)
+	res, err := config.DB.Exec("UPDATE artists SET name=$1, genre=$2, date_last_album=$3, image_url=$4, color=$5 WHERE id=$6",
+		updatedArtist.Name, updatedArtist.Genre, updatedArtist.Year, updatedArtist.ImageURL, updatedArtist.Color, id)
 	if err != nil {
 		http.Error(w, "Erreur mise à jour", http.StatusInternalServerError)
 		return
@@ -172,4 +182,30 @@ func deleteArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Artiste supprimé"})
+}
+
+// Fonction utilitaire pour récupérer les concerts d'un artiste
+func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
+	rows, err := config.DB.Query("SELECT id, artist_id, location, date, latitude, longitude FROM concerts WHERE artist_id = $1", artistID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var concerts []models.Concert
+	for rows.Next() {
+		var c models.Concert
+		var dateStr string // On récupère la date en string pour l'instant
+		if err := rows.Scan(&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude); err != nil {
+			continue
+		}
+		c.Date = dateStr
+		concerts = append(concerts, c)
+	}
+
+	if concerts == nil {
+		return []models.Concert{}, nil
+	}
+
+	return concerts, nil
 }
