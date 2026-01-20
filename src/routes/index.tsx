@@ -6,7 +6,7 @@ import {
   type Artist,
 } from "@/features/artists";
 import { useState, useEffect, useRef } from "react";
-import ConcertGlobe from "@/features/globe/components/ConcertGlobe";
+import GlobeLayout from "@/features/globe/GlobeLayout";
 
 export const Route = createFileRoute("/")({
   component: App,
@@ -125,13 +125,7 @@ function App() {
           ))}
         </div>
       )}
-      <div className="text-center mt-16">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">
-          Les Concerts
-        </h1>
-      </div>
-
-      <ConcertGlobe artists={artists} />
+      <GlobeLayout artists={artists} />
       <ArtistDialog
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
