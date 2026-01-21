@@ -4,7 +4,7 @@ import { useArtists, ArtistFormDialog } from "@/features/artists";
 import { Button } from "@/shared/components/ui/button";
 import { Plus } from "lucide-react";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import AdminArtistCard from "./components/AdminArtistCard";
+import AdminArtistCard from "@/features/artists/components/AdminArtistCard";
 import { useAuthStore } from "@/features/auth";
 
 export const Route = createFileRoute("/admin/")({
