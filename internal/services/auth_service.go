@@ -26,9 +26,10 @@ var jwtKey = []byte("ta_clé_secrète_super_longue_et_compliquée")
 
 // 2. Création de la fonction
 
-func GenerateToken(email string, admin string) (string, error) {
+func GenerateToken(id int, email string, admin string) (string, error) {
 	// 1. On définit le contenu du jeton (les "Claims")
 	claims := jwt.MapClaims{
+		"id":    id,    // L'ID de l'utilisateur
 		"email": email, // L'identité de l'utilisateur
 		"role":  admin,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(), // Date d'expiration (dans 24h)
@@ -45,4 +46,20 @@ func GenerateToken(email string, admin string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func ValidateToken(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, jwt.ErrSignatureInvalid
 }
