@@ -44,13 +44,25 @@ func InitDB() error {
 }
 
 func RunMigrations() error {
-	content, err := os.ReadFile("migrations/001_create_users_table.sql")
-	if err != nil {
-		return err
+	// 1. On définit la liste de nos fichiers SQL dans l'ordre
+	files := []string{
+		"migrations/001_create_users_table.sql",
+		"migrations/002_create_orders_table.sql",
 	}
-	_, err = DB.Exec(string(content))
-	if err != nil {
-		return err
+
+	// 2. On fait une boucle pour les exécuter un par un
+	for _, file := range files {
+		content, err := os.ReadFile(file)
+		if err != nil {
+			return fmt.Errorf("erreur lecture fichier %s: %w", file, err)
+		}
+
+		_, err = DB.Exec(string(content))
+		if err != nil {
+			return fmt.Errorf("erreur exécution migration %s: %w", file, err)
+		}
+		fmt.Printf("✅ Migration réussie : %s\n", file)
 	}
+
 	return nil
 }
