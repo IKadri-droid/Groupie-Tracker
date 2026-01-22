@@ -14,6 +14,9 @@ import { Button } from "@/shared/components/ui/button";
 import { Slider } from "@/shared/components/ui/slider";
 import { Play, Pause } from "lucide-react";
 import { useRef, useState } from "react";
+import { useAuthStore } from "@/features/auth";
+import { createCheckoutSession } from "@/features/payment/api/paymentApi";
+import { toast } from "sonner";
 
 interface Props {
   isDialogOpen: boolean;
@@ -29,6 +32,27 @@ export default function ArtistDialog({
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [volume, setVolume] = useState([1]); // Tableau car le Slider Shadcn attend un tableau (0 à 1)
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { token, user } = useAuthStore();
+
+  const handleBuyTicket = async () => {
+    if (!user || !token) {
+      toast.error("Vous devez être connecté pour acheter un billet");
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Pour l'exemple, on utilise l'ID de l'artiste comme ID de concert
+      const { url } = await createCheckoutSession(selectedArtist?.id || 0, token);
+      window.location.href = url; // Redirection vers Stripe
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error("Erreur lors de l'initialisation du paiement");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -136,8 +160,17 @@ export default function ArtistDialog({
           {/* prochain concert */}
           <div className="p-4 flex flex-col items-center">
             <h1 className="mb-2">Prochain concert</h1>
-            <div className="font-extralight text-lg">
-              {"Aucun concert planifié"}
+            <div className="flex-1 flex flex-col items-center justify-center gap-4">
+              <div className="font-extralight text-lg text-slate-300">
+                {"Paris - 25 Mai 2026"}
+              </div>
+              <Button
+                onClick={handleBuyTicket}
+                disabled={isProcessing}
+                className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+              >
+                {isProcessing ? "Redirection..." : "Réserver - 20€"}
+              </Button>
             </div>
           </div>
         </div>
