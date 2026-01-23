@@ -96,7 +96,7 @@ export default function SidebarControls({
               transition-all duration-300 ease-out
               ${
                 isOpen
-                  ? "opacity-100 max-h-40"
+                  ? "opacity-100 max-h-24"
                   : "opacity-0 max-h-0 pointer-events-none"
               }
             `}
