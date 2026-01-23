@@ -2,13 +2,19 @@ import type { Artist } from "@/features/artists";
 import { Card } from "@/shared/components/ui/card";
 import { useState, useMemo } from "react";
 import SidebarControls from "./sideBar/SidebarControls";
+import ConcertCard from "./sideBar/ConcertCard";
 
 interface GlobeSidebarProps {
   artist: Artist | null;
   artists: Artist[];
+  onConcertClick?: (lat: number, lng: number) => void;
 }
 
-export default function GlobeSidebar({ artist, artists }: GlobeSidebarProps) {
+export default function GlobeSidebar({
+  artist,
+  artists,
+  onConcertClick,
+}: GlobeSidebarProps) {
   const allConcerts = artists.flatMap((artist) => {
     if (!artist.concerts) return [];
     return artist.concerts.map((concert) => ({
@@ -21,6 +27,13 @@ export default function GlobeSidebar({ artist, artists }: GlobeSidebarProps) {
   const [sortBy, setSortBy] = useState<"date" | "location">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedConcertId, setExpandedConcertId] = useState<number | null>(
+    null,
+  );
+
+  const handleToggleExpand = (id: number) => {
+    setExpandedConcertId((prev) => (prev === id ? null : id));
+  };
 
   const sortedConcerts = useMemo(() => {
     // 1. Filtrer les concerts
@@ -71,18 +84,17 @@ export default function GlobeSidebar({ artist, artists }: GlobeSidebarProps) {
         />
       </div>
 
-      <div className="flex flex-col gap-4 overflow-y-auto max-h-full rounded-lg scrollbar-hide pb-20">
+      {/* On garde le conteneur défilant */}
+      <div className="flex flex-col gap-4 overflow-y-auto max-h-full rounded-lg scrollbar-hide pb-20 px-1">
+        {/* On boucle sur les concerts triés */}
         {sortedConcerts.map((concert) => (
-          <div
+          <ConcertCard
             key={concert.id}
-            className="p-3 rounded-xl border border-white/20 bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)] hover:from-white/20 hover:via-white/10 hover:to-white/15 hover:border-white/30 transition-all duration-300"
-          >
-            <h3 className="font-bold">{concert.artistName}</h3>
-            <p className="text-sm opacity-80">{concert.location}</p>
-            <p className="text-xs opacity-60">
-              {new Date(concert.date).toLocaleDateString("fr-FR")}
-            </p>
-          </div>
+            concert={concert}
+            isExpanded={concert.id === expandedConcertId}
+            onToggleExpand={() => handleToggleExpand(concert.id)}
+            onConcertClick={onConcertClick}
+          />
         ))}
       </div>
     </Card>
