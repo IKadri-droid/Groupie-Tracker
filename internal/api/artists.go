@@ -186,26 +186,50 @@ func deleteArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 
 // Fonction utilitaire pour récupérer les concerts d'un artiste
 func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
-	rows, err := config.DB.Query("SELECT id, artist_id, location, date, latitude, longitude FROM concerts WHERE artist_id = $1", artistID)
+	// 1. On demande TOUTES les colonnes dans un ordre précis
+	query := `
+		SELECT id, artist_id, location, date, latitude, longitude, 
+		       time, venue, price, available_seats, ticket_url 
+		FROM concerts 
+		WHERE artist_id = $1`
+
+	rows, err := config.DB.Query(query, artistID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
 	var concerts []models.Concert
 	for rows.Next() {
 		var c models.Concert
-		var dateStr string // On récupère la date en string pour l'instant
-		if err := rows.Scan(&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude); err != nil {
+		var dateStr string
+		var time, venue, price, ticketURL sql.NullString
+		var availableSeats sql.NullInt32
+		err := rows.Scan(
+			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &time, &venue, &price, &availableSeats, &ticketURL,
+		)
+		if err != nil {
 			continue
 		}
 		c.Date = dateStr
+		if time.Valid {
+			c.Time = time.String
+		}
+		if venue.Valid {
+			c.Venue = venue.String
+		}
+		if price.Valid {
+			c.Price = price.String
+		}
+		if availableSeats.Valid {
+			c.AvailableSeats = int(availableSeats.Int32)
+		}
+		if ticketURL.Valid {
+			c.TicketURL = ticketURL.String
+		}
 		concerts = append(concerts, c)
 	}
-
 	if concerts == nil {
 		return []models.Concert{}, nil
 	}
-
 	return concerts, nil
 }
