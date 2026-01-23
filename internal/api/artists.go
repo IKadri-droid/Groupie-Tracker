@@ -189,7 +189,7 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 	// 1. On demande TOUTES les colonnes dans un ordre précis
 	query := `
 		SELECT id, artist_id, location, date, latitude, longitude, 
-		       time, venue, price, available_seats, ticket_url 
+		       time, venue, price, available_seats 
 		FROM concerts 
 		WHERE artist_id = $1`
 
@@ -202,10 +202,10 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 	for rows.Next() {
 		var c models.Concert
 		var dateStr string
-		var time, venue, price, ticketURL sql.NullString
+		var time, venue, price sql.NullString
 		var availableSeats sql.NullInt32
 		err := rows.Scan(
-			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &time, &venue, &price, &availableSeats, &ticketURL,
+			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &time, &venue, &price, &availableSeats,
 		)
 		if err != nil {
 			continue
@@ -222,9 +222,6 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 		}
 		if availableSeats.Valid {
 			c.AvailableSeats = int(availableSeats.Int32)
-		}
-		if ticketURL.Valid {
-			c.TicketURL = ticketURL.String
 		}
 		concerts = append(concerts, c)
 	}

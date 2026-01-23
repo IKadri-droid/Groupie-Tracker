@@ -22,5 +22,4 @@ type Concert struct {
 	Venue          string  `json:"venue"`
 	Price          string  `json:"price"`
 	AvailableSeats int     `json:"available_seats"`
-	TicketURL      string  `json:"ticket_url"`
 }
