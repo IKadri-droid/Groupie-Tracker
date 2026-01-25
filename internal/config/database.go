@@ -48,6 +48,8 @@ func RunMigrations() error {
 	files := []string{
 		"migrations/001_create_users_table.sql",
 		"migrations/002_create_orders_table.sql",
+		"migrations/003_add_concert_details.sql",
+		"migrations/004_create_favorites_table.sql",
 	}
 
 	// 2. On fait une boucle pour les exécuter un par un
