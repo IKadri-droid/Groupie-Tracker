@@ -9,9 +9,7 @@ import (
 )
 
 func main() {
-	//charge les variable du .env
 	config.LoadEnv()
-	// Initialiser la base de données
 	if err := config.InitDB(); err != nil {
 		log.Fatal("❌ Error initializing database:", err)
 	}
@@ -21,7 +19,6 @@ func main() {
 		log.Fatal("Error Migrations", err)
 	}
 
-	// Enregistrer les routes
 	http.HandleFunc("/api/artists", api.HandleArtists)
 	http.HandleFunc("/api/artists/", api.HandleArtists)
 	http.HandleFunc("/api/login", api.HandleLogin)
