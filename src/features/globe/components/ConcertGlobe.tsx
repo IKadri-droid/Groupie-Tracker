@@ -15,7 +15,7 @@ export interface ConcertGlobeHandle {
 
 interface ConcertGlobeProps {
   artists: Artist[]; // Je veux un tableau d'Artist
-  onPointClick?: (artist: Artist) => void;
+  onPointClick?: (artist: Artist, concertId: number) => void;
   selectedCoords?: { lat: number; lng: number } | null;
 }
 
@@ -76,6 +76,7 @@ const ConcertGlobe = forwardRef<ConcertGlobeHandle, ConcertGlobeProps>(
               : "red", // Rouge par défaut
           size: 0.5,
           artist: artist,
+          concertId: concert.id,
         }));
       });
     }, [artists, selectedCoords]);
@@ -138,7 +139,7 @@ const ConcertGlobe = forwardRef<ConcertGlobeHandle, ConcertGlobeProps>(
           }}
           onObjectClick={(obj: any) => {
             if (onPointClick && obj.artist) {
-              onPointClick(obj.artist);
+              onPointClick(obj.artist, obj.concertId);
             }
           }}
           onGlobeReady={() => {}}
