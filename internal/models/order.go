@@ -24,16 +24,6 @@ type OrderHistory struct {
 	Venue    string  `json:"venue"`
 }
 
-type PaymentSummaryResponse struct {
-	ArtistName  string  `json:"artist_name"`
-	ArtistImage string  `json:"artist_image"`
-	Location    string  `json:"location"`
-	Date        string  `json:"date"`
-	Venue       string  `json:"venue"`
-	Price       float64 `json:"price"`
-	ConcertID   int     `json:"concert_id"`
-}
-
 func CreateOrder(order *Order) error {
 	query := `INSERT INTO orders (user_id, concert_id, amount, status, stripe_session_id) 
               VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`

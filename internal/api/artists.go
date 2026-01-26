@@ -189,7 +189,7 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 	// 1. On demande TOUTES les colonnes dans un ordre précis
 	query := `
 		SELECT id, artist_id, location, date, latitude, longitude, 
-		       venue, price, available_seats 
+		       venue, price, available_seats, image_concert
 		FROM concerts 
 		WHERE artist_id = $1`
 
@@ -205,7 +205,7 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 		var venue, price sql.NullString
 		var availableSeats sql.NullInt32
 		err := rows.Scan(
-			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &venue, &price, &availableSeats,
+			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &venue, &price, &availableSeats, &c.ImageConcert,
 		)
 		if err != nil {
 			continue
