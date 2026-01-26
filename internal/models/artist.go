@@ -18,6 +18,7 @@ type Concert struct {
 	Date           string  `json:"date"`      // Pour l'instant string, ou time.Time si tu veux
 	Latitude       float64 `json:"latitude"`  // Pour le globe
 	Longitude      float64 `json:"longitude"` // Pour le globe
+	ConcertImage   string  `json:"concert_image"`
 	Venue          string  `json:"venue"`
 	Price          string  `json:"price"`
 	AvailableSeats int     `json:"available_seats"`
