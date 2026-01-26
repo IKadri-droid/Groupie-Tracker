@@ -21,4 +21,5 @@ type Concert struct {
 	Venue          string  `json:"venue"`
 	Price          string  `json:"price"`
 	AvailableSeats int     `json:"available_seats"`
+	ConcertImage   string  `json:"concert_image"`
 }

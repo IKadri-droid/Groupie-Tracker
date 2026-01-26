@@ -16,12 +16,13 @@ type Order struct {
 }
 
 type OrderHistory struct {
-	ID       int     `json:"id"`
-	Amount   float64 `json:"amount"`
-	Status   string  `json:"status"`
-	Location string  `json:"location"`
-	Date     string  `json:"date"`
-	Venue    string  `json:"venue"`
+	ID           int     `json:"id"`
+	Amount       float64 `json:"amount"`
+	Status       string  `json:"status"`
+	Location     string  `json:"location"`
+	Date         string  `json:"date"`
+	Venue        string  `json:"venue"`
+	ConcertImage string  `json:"concert_image"`
 }
 
 func CreateOrder(order *Order) error {
@@ -41,7 +42,7 @@ func UpdateOrderStatusByStripeID(stripeSessionID string, status string) error {
 }
 
 func GetOrdersByUserID(userID int) ([]OrderHistory, error) {
-	query := `SELECT orders.id, orders.amount, orders.status, concerts.location, concerts.date, concerts.venue
+	query := `SELECT orders.id, orders.amount, orders.status, concerts.location, concerts.date, concerts.venue, concerts.concert_image
               FROM orders
               JOIN concerts ON orders.concert_id = concerts.id
               WHERE orders.user_id = $1`
@@ -56,7 +57,7 @@ func GetOrdersByUserID(userID int) ([]OrderHistory, error) {
 
 	for rows.Next() {
 		var h OrderHistory
-		err := rows.Scan(&h.ID, &h.Amount, &h.Status, &h.Location, &h.Date, &h.Venue)
+		err := rows.Scan(&h.ID, &h.Amount, &h.Status, &h.Location, &h.Date, &h.Venue, &h.ConcertImage)
 		if err != nil {
 			return nil, err
 		}
