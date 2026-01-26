@@ -9,14 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuccessRouteImport } from './routes/success'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PreCheckoutRouteImport } from './routes/pre-checkout'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CancelRouteImport } from './routes/cancel'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 
+const SuccessRoute = SuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -37,6 +44,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CancelRoute = CancelRouteImport.update({
+  id: '/cancel',
+  path: '/cancel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,29 +67,35 @@ const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cancel': typeof CancelRoute
   '/login': typeof LoginRoute
   '/pre-checkout': typeof PreCheckoutRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
+  '/success': typeof SuccessRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cancel': typeof CancelRoute
   '/login': typeof LoginRoute
   '/pre-checkout': typeof PreCheckoutRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
+  '/success': typeof SuccessRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cancel': typeof CancelRoute
   '/login': typeof LoginRoute
   '/pre-checkout': typeof PreCheckoutRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
+  '/success': typeof SuccessRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/admin/': typeof AdminIndexRoute
 }
@@ -85,44 +103,59 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/cancel'
     | '/login'
     | '/pre-checkout'
     | '/profil'
     | '/register'
+    | '/success'
     | '/demo/tanstack-query'
     | '/admin'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cancel'
     | '/login'
     | '/pre-checkout'
     | '/profil'
     | '/register'
+    | '/success'
     | '/demo/tanstack-query'
     | '/admin'
   id:
     | '__root__'
     | '/'
+    | '/cancel'
     | '/login'
     | '/pre-checkout'
     | '/profil'
     | '/register'
+    | '/success'
     | '/demo/tanstack-query'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CancelRoute: typeof CancelRoute
   LoginRoute: typeof LoginRoute
   PreCheckoutRoute: typeof PreCheckoutRoute
   ProfilRoute: typeof ProfilRoute
   RegisterRoute: typeof RegisterRoute
+  SuccessRoute: typeof SuccessRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/success': {
+      id: '/success'
+      path: '/success'
+      fullPath: '/success'
+      preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -151,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cancel': {
+      id: '/cancel'
+      path: '/cancel'
+      fullPath: '/cancel'
+      preLoaderRoute: typeof CancelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -177,10 +217,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CancelRoute: CancelRoute,
   LoginRoute: LoginRoute,
   PreCheckoutRoute: PreCheckoutRoute,
   ProfilRoute: ProfilRoute,
   RegisterRoute: RegisterRoute,
+  SuccessRoute: SuccessRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

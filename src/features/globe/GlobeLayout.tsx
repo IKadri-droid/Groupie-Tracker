@@ -7,10 +7,14 @@ import { useState, useRef } from "react";
 
 export default function GlobeLayout({ artists }: { artists: Artist[] }) {
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [expandedConcertId, setExpandedConcertId] = useState<number | null>(
+    null,
+  );
   const globeRef = useRef<ConcertGlobeHandle>(null);
 
-  const handlePointClick = (artist: Artist) => {
+  const handlePointClick = (artist: Artist, concertId: number) => {
     setSelectedArtist(artist);
+    setExpandedConcertId(concertId); // On ouvre la carte correspondante !
   };
 
   const handleConcertClick = (lat: number, lng: number) => {
@@ -33,6 +37,8 @@ export default function GlobeLayout({ artists }: { artists: Artist[] }) {
           artist={selectedArtist}
           artists={artists}
           onConcertClick={handleConcertClick}
+          expandedConcertId={expandedConcertId}
+          setExpandedConcertId={setExpandedConcertId}
         />
       </div>
       {/* Le Globe prend toute la place */}
