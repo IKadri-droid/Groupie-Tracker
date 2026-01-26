@@ -186,10 +186,9 @@ func deleteArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 
 // Fonction utilitaire pour récupérer les concerts d'un artiste
 func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
-	// 1. On demande TOUTES les colonnes dans un ordre précis
 	query := `
-		SELECT id, artist_id, location, date, latitude, longitude, 
-		       venue, price, available_seats 
+		SELECT id, artist_id, location, date, latitude, longitude, image_concert,
+		       venue, price, available_seats
 		FROM concerts 
 		WHERE artist_id = $1`
 
@@ -198,19 +197,34 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 		return nil, err
 	}
 	defer rows.Close()
+
 	var concerts []models.Concert
 	for rows.Next() {
 		var c models.Concert
 		var dateStr string
-		var venue, price sql.NullString
+		var venue, price, concertImg sql.NullString
 		var availableSeats sql.NullInt32
+
 		err := rows.Scan(
-			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &venue, &price, &availableSeats,
+			&c.ID,
+			&c.ArtistID,
+			&c.Location,
+			&dateStr,
+			&c.Latitude,
+			&c.Longitude,
+			&concertImg,
+			&venue,
+			&price,
+			&availableSeats,
 		)
 		if err != nil {
 			continue
 		}
+
 		c.Date = dateStr
+		if concertImg.Valid {
+			c.ConcertImage = concertImg.String
+		}
 		if venue.Valid {
 			c.Venue = venue.String
 		}
@@ -222,6 +236,7 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 		}
 		concerts = append(concerts, c)
 	}
+
 	if concerts == nil {
 		return []models.Concert{}, nil
 	}
