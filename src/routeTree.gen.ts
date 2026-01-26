@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as PreCheckoutRouteImport } from './routes/pre-checkout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -24,6 +25,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const ProfilRoute = ProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreCheckoutRoute = PreCheckoutRouteImport.update({
+  id: '/pre-checkout',
+  path: '/pre-checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -50,6 +56,7 @@ const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/pre-checkout': typeof PreCheckoutRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/pre-checkout': typeof PreCheckoutRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/pre-checkout': typeof PreCheckoutRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/pre-checkout'
     | '/profil'
     | '/register'
     | '/demo/tanstack-query'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/pre-checkout'
     | '/profil'
     | '/register'
     | '/demo/tanstack-query'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/login'
+    | '/pre-checkout'
     | '/profil'
     | '/register'
     | '/demo/tanstack-query'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  PreCheckoutRoute: typeof PreCheckoutRoute
   ProfilRoute: typeof ProfilRoute
   RegisterRoute: typeof RegisterRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/profil'
       fullPath: '/profil'
       preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pre-checkout': {
+      id: '/pre-checkout'
+      path: '/pre-checkout'
+      fullPath: '/pre-checkout'
+      preLoaderRoute: typeof PreCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  PreCheckoutRoute: PreCheckoutRoute,
   ProfilRoute: ProfilRoute,
   RegisterRoute: RegisterRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
