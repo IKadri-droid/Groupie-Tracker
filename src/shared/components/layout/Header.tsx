@@ -12,7 +12,7 @@ export default function Header() {
 
   return (
     <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
-      <nav className="flex items-center gap-1 p-1.5 rounded-full  backdrop-blur-lg bg-white/30 dark:bg-black/30 border border-white/10 shadow-2xl">
+      <nav className="flex items-center gap-1 p-1.5 rounded-full bg-gradient-to-br from-white/15 via-white/5 to-white/10 border border-white/40 backdrop-blur-xl shadow-[inset_0_2px_3px_rgba(255,255,255,0.6),inset_0_-1px_2px_rgba(255,255,255,0.3),0_8px_32px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.1)]">
         {/* Navigation items */}
         <Link
           to="/"
@@ -37,7 +37,7 @@ export default function Header() {
                   "bg-white text-black shadow-lg hover:text-black font-semibold",
               }}
             >
-              <span className="flex items-center gap-2 uppercase">Profile</span>
+              <span className="flex items-center gap-2 uppercase">Profil</span>
             </Link>
 
             {user.email === "AdminGroupie@groupie.com" && (

@@ -17,4 +17,7 @@ export interface Concert {
   date: string;
   latitude: number;
   longitude: number;
+  venue: string;
+  price: string;
+  available_seats: number;
 }
