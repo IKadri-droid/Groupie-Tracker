@@ -210,11 +210,7 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 		var venue, price sql.NullString
 		var availableSeats sql.NullInt32
 		err := rows.Scan(
-<<<<<<< Updated upstream
 			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &venue, &price, &availableSeats, &c.ImageConcert,
-=======
-			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &c.ConcertImage, &venue, &price, &availableSeats,
->>>>>>> Stashed changes
 		)
 		if err != nil {
 			continue

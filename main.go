@@ -27,8 +27,6 @@ func main() {
 	http.HandleFunc("/api/deezer/top-tracks", api.HandleDeezerTopTracks)
 	http.HandleFunc("/api/register", api.HandleRegister)
 	http.HandleFunc("/api/create-checkout-session", api.HandleCreateCheckoutSession)
-	http.HandleFunc("/api/payment-summary", api.HandleGetPaymentSummary)
-	http.HandleFunc("/api/confirm-payment", api.HandlePaymentConfirm)
 	http.HandleFunc("/api/history", api.GetUserHistory)
 	http.HandleFunc("/api/favorites", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet || r.Method == "OPTIONS" {
