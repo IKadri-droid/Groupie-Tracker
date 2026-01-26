@@ -86,8 +86,8 @@ function App() {
         </div>
         {/* En-tête */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent mb-2">
-            🎸 Artistes
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
+            Les Artistes
           </h1>
         </div>
 
