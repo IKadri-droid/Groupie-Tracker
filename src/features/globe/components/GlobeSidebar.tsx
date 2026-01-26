@@ -1,6 +1,6 @@
 import type { Artist } from "@/features/artists";
 import { Card } from "@/shared/components/ui/card";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import SidebarControls from "./sideBar/SidebarControls";
 import ConcertCard from "./sideBar/ConcertCard";
 
@@ -8,12 +8,16 @@ interface GlobeSidebarProps {
   artist: Artist | null;
   artists: Artist[];
   onConcertClick?: (lat: number, lng: number) => void;
+  expandedConcertId: number | null;
+  setExpandedConcertId: (id: number | null) => void;
 }
 
 export default function GlobeSidebar({
   artist,
   artists,
   onConcertClick,
+  expandedConcertId,
+  setExpandedConcertId,
 }: GlobeSidebarProps) {
   const allConcerts = artists.flatMap((artist) => {
     if (!artist.concerts) return [];
@@ -21,18 +25,35 @@ export default function GlobeSidebar({
       ...concert,
       artistName: artist.name,
       artistImage: artist.image_url,
+      // On s'assure que les champs snake_case du backend sont bien passés
+      venue: concert.venue,
+      price: concert.price,
+      available_seats: concert.available_seats,
     }));
   });
 
   const [sortBy, setSortBy] = useState<"date" | "location">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedConcertId, setExpandedConcertId] = useState<number | null>(
-    null,
-  );
+
+  const shouldScrollRef = useRef(true);
+
+  // Effet pour scroller vers la carte ouverte
+  useEffect(() => {
+    if (expandedConcertId && shouldScrollRef.current) {
+      const element = document.getElementById(
+        `concert-card-${expandedConcertId}`,
+      );
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+    shouldScrollRef.current = true; // On réactive le scroll pour les prochains clics (ex: depuis le Globe)
+  }, [expandedConcertId]);
 
   const handleToggleExpand = (id: number) => {
-    setExpandedConcertId((prev) => (prev === id ? null : id));
+    shouldScrollRef.current = false; // On désactive le scroll auto quand on clique manuellement
+    setExpandedConcertId(expandedConcertId === id ? null : id);
   };
 
   const sortedConcerts = useMemo(() => {
@@ -88,13 +109,14 @@ export default function GlobeSidebar({
       <div className="flex flex-col gap-4 overflow-y-auto max-h-full rounded-lg scrollbar-hide pb-20 px-1">
         {/* On boucle sur les concerts triés */}
         {sortedConcerts.map((concert) => (
-          <ConcertCard
-            key={concert.id}
-            concert={concert}
-            isExpanded={concert.id === expandedConcertId}
-            onToggleExpand={() => handleToggleExpand(concert.id)}
-            onConcertClick={onConcertClick}
-          />
+          <div key={concert.id} id={`concert-card-${concert.id}`}>
+            <ConcertCard
+              concert={concert}
+              isExpanded={concert.id === expandedConcertId}
+              onToggleExpand={() => handleToggleExpand(concert.id)}
+              onConcertClick={onConcertClick}
+            />
+          </div>
         ))}
       </div>
     </Card>
