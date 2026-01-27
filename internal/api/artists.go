@@ -190,6 +190,11 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 		SELECT id, artist_id, location, date, latitude, longitude, image_concert,
 <<<<<<< Updated upstream
 		       venue, price, available_seats
+<<<<<<< HEAD
+=======
+		SELECT id, artist_id, location, date, latitude, longitude, image_concert,
+		       venue, price, available_seats
+>>>>>>> checkout
 =======
 		       venue, price, available_seats 
 >>>>>>> Stashed changes
@@ -210,6 +215,7 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 		var availableSeats sql.NullInt32
 
 		err := rows.Scan(
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 			&c.ID,
 			&c.ArtistID,
@@ -224,6 +230,10 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 =======
 			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &c.ConcertImage, &venue, &price, &availableSeats,
 >>>>>>> Stashed changes
+=======
+			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &concertImg,
+			&venue, &price, &availableSeats,
+>>>>>>> checkout
 		)
 		if err != nil {
 			continue
