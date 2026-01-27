@@ -16,6 +16,11 @@ import (
 func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	// 1. Autorisation et Sécurité
 	EnableCORS(w)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
@@ -109,6 +114,11 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 // HandlePaymentConfirm est appelé quand l'utilisateur revient du paiement réussi
 func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 	EnableCORS(w)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
