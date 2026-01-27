@@ -188,9 +188,13 @@ func deleteArtist(w http.ResponseWriter, r *http.Request, idStr string) {
 func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 	query := `
 		SELECT id, artist_id, location, date, latitude, longitude, image_concert,
+<<<<<<< Updated upstream
 		       venue, price, available_seats
 		SELECT id, artist_id, location, date, latitude, longitude, image_concert,
 		       venue, price, available_seats
+=======
+		       venue, price, available_seats 
+>>>>>>> Stashed changes
 		FROM concerts 
 		WHERE artist_id = $1`
 
@@ -208,8 +212,12 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 		var availableSeats sql.NullInt32
 
 		err := rows.Scan(
+<<<<<<< Updated upstream
 			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &concertImg,
 			&venue, &price, &availableSeats,
+=======
+			&c.ID, &c.ArtistID, &c.Location, &dateStr, &c.Latitude, &c.Longitude, &c.ConcertImage, &venue, &price, &availableSeats,
+>>>>>>> Stashed changes
 		)
 		if err != nil {
 			continue
