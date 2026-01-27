@@ -11,6 +11,10 @@ import (
 // HandleDeezerSearch recherche un artiste sur Deezer
 func HandleDeezerSearch(w http.ResponseWriter, r *http.Request) {
 	EnableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 	name := r.URL.Query().Get("name")
 	if name == "" {
 		http.Error(w, "Nom de l'artiste manquant", http.StatusBadRequest)
@@ -30,6 +34,10 @@ func HandleDeezerSearch(w http.ResponseWriter, r *http.Request) {
 // HandleDeezerAlbums récupère les albums d'un artiste Deezer
 func HandleDeezerAlbums(w http.ResponseWriter, r *http.Request) {
 	EnableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 	artistIDStr := r.URL.Query().Get("artistID")
 	if artistIDStr == "" {
 		http.Error(w, "ID de l'artiste manquant", http.StatusBadRequest)
@@ -55,6 +63,10 @@ func HandleDeezerAlbums(w http.ResponseWriter, r *http.Request) {
 // HandleDeezerTopTracks récupère les meilleures pistes d'un artiste Deezer
 func HandleDeezerTopTracks(w http.ResponseWriter, r *http.Request) {
 	EnableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 	artistIDStr := r.URL.Query().Get("artistID")
 	if artistIDStr == "" {
 		http.Error(w, "ID de l'artiste manquant", http.StatusBadRequest)
