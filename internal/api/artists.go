@@ -189,6 +189,8 @@ func getConcertsByArtistID(artistID int) ([]models.Concert, error) {
 	query := `
 		SELECT id, artist_id, location, date, latitude, longitude, image_concert,
 		       venue, price, available_seats
+		SELECT id, artist_id, location, date, latitude, longitude, image_concert,
+		       venue, price, available_seats
 		FROM concerts 
 		WHERE artist_id = $1`
 
