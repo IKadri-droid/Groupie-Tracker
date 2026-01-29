@@ -6,6 +6,11 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card";
 
 export const Route = createFileRoute("/success")({
+    validateSearch: (search: Record<string, unknown>) => {
+        return {
+            session_id: (search.session_id as string) || "",
+        };
+    },
     component: SuccessComponent,
 });
 
