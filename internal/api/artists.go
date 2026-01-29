@@ -24,7 +24,7 @@ func HandleArtists(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/api/artists")
 	path = strings.TrimPrefix(path, "/")
 
-	switch r.Method {
+		switch r.Method {
 	case "GET":
 		if path == "" {
 			getAllArtists(w, r)
@@ -32,15 +32,29 @@ func HandleArtists(w http.ResponseWriter, r *http.Request) {
 			getArtistByID(w, r, path)
 		}
 	case "POST":
+		
+		if !IsAdmin(r) {
+			http.Error(w, "Accès interdit : Administrateurs uniquement", http.StatusForbidden)
+			return
+		}
 		createArtist(w, r)
 	case "PUT":
+
+		if !IsAdmin(r) {
+			http.Error(w, "Accès interdit : Administrateurs uniquement", http.StatusForbidden)
+			return
+		}
 		updateArtist(w, r, path)
 	case "DELETE":
+
+		if !IsAdmin(r) {
+			http.Error(w, "Accès interdit : Administrateurs uniquement", http.StatusForbidden)
+			return
+		}
 		deleteArtist(w, r, path)
 	default:
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 	}
-}
 
 func getAllArtists(w http.ResponseWriter, r *http.Request) {
 	rows, err := config.DB.Query("SELECT id, name, genre, date_last_album, image_url, color FROM artists ORDER BY id")
