@@ -11,6 +11,11 @@ import (
 // HandleGetProfile est la fonction qui va répondre au Front-end
 func HandleGetProfile(w http.ResponseWriter, r *http.Request) {
 	EnableCORS(w)
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.Method != http.MethodGet {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
@@ -31,7 +36,7 @@ func HandleGetProfile(w http.ResponseWriter, r *http.Request) {
 	var username, email, role string
 	var orderCount int
 
-	err = config.DB.QueryRow("SELECT username, email, role FROM users WHERE id = $1", userID).
+	err = config.DB.QueryRow("SELECT COALESCE(username, email), email, COALESCE(role, 'user') FROM users WHERE id = $1", userID).
 		Scan(&username, &email, &role)
 	if err != nil {
 		http.Error(w, "Utilisateur introuvable", http.StatusNotFound)

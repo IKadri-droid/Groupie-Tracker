@@ -42,7 +42,7 @@ func UpdateOrderStatusByStripeID(stripeSessionID string, status string) error {
 }
 
 func GetOrdersByUserID(userID int) ([]OrderHistory, error) {
-	query := `SELECT orders.id, orders.amount, orders.status, concerts.location, concerts.date, concerts.venue, concerts.concert_image
+	query := `SELECT orders.id, orders.amount, orders.status, concerts.location, concerts.date, concerts.venue, concerts.image_concert
               FROM orders
               JOIN concerts ON orders.concert_id = concerts.id
               WHERE orders.user_id = $1`
