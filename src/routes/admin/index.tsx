@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 import AdminArtistCard from "@/features/artists/components/AdminArtistCard";
 import { useAuthStore } from "@/features/auth";
 
+
 export const Route = createFileRoute("/admin/")({
   beforeLoad: () => {
     const { user, token } = useAuthStore.getState();

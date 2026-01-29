@@ -43,8 +43,17 @@ export default function ArtistDialog({
 
     setIsProcessing(true);
     try {
-      // Pour l'exemple, on utilise l'ID de l'artiste comme ID de concert
-      const { url } = await createCheckoutSession(selectedArtist?.id || 0, token);
+      // 1. On cherche le premier concert disponible de l'artiste
+      const concertId = selectedArtist?.concerts?.[0]?.id;
+
+      if (!concertId) {
+        toast.error("Aucun concert disponible pour cet artiste pour le moment.");
+        setIsProcessing(false);
+        return;
+      }
+
+      // 2. On utilise le VRAI id du concert et non l'id de l'artiste
+      const { url } = await createCheckoutSession(concertId, token);
       window.location.href = url; // Redirection vers Stripe
     } catch (error) {
       console.error("Payment error:", error);
