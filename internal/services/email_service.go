@@ -15,6 +15,7 @@ func SendTicketEmail(toEmail, username, artist, location, date, venue string, am
 	subject := fmt.Sprintf("Subject: 🎫 Votre billet pour %s - %s\n", artist, venue)
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 
+	// On prend les 8 derniers caractères de l'ID pour faire un numéro de billet court
 	shortID := sessionID
 	if len(sessionID) > 8 {
 		shortID = sessionID[len(sessionID)-8:]
