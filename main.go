@@ -28,6 +28,7 @@ func main() {
 	http.HandleFunc("/api/register", api.HandleRegister)
 	http.HandleFunc("/api/create-checkout-session", api.HandleCreateCheckoutSession)
 	http.HandleFunc("/api/history", api.GetUserHistory)
+	http.HandleFunc("/api/concerts", api.HandleConcerts)
 	http.HandleFunc("/api/favorites", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet || r.Method == "OPTIONS" {
 			api.HandleGetFavorites(w, r)
