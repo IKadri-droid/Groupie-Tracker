@@ -2,46 +2,54 @@ package main
 
 import (
 	"fmt"
-	"groupie/internal/api"
-	"groupie/internal/config"
+	"groupie/internal/core"
+	"groupie/internal/features/artists"
+	"groupie/internal/features/auth"
+	"groupie/internal/features/payment"
+	"groupie/internal/features/user"
 	"log"
 	"net/http"
 )
 
 func main() {
-	config.LoadEnv()
-	if err := config.InitDB(); err != nil {
-		log.Fatal("❌ Error initializing database:", err)
+	// 1. Initialisation du coeur (DB + Env)
+	if err := core.InitDB(); err != nil {
+		log.Fatal("❌ Database connection failed:", err)
 	}
-	defer config.DB.Close()
+	defer core.DB.Close()
 
-	if err := config.RunMigrations(); err != nil {
-		log.Fatal("Error Migrations", err)
+	if err := core.RunMigrations(); err != nil {
+		log.Fatal("❌ Migrations failed:", err)
 	}
 
-	http.HandleFunc("/api/artists", api.HandleArtists)
-	http.HandleFunc("/api/artists/", api.HandleArtists)
-	http.HandleFunc("/api/login", api.HandleLogin)
-	http.HandleFunc("/api/deezer/search", api.HandleDeezerSearch)
-	http.HandleFunc("/api/deezer/albums", api.HandleDeezerAlbums)
-	http.HandleFunc("/api/deezer/top-tracks", api.HandleDeezerTopTracks)
-	http.HandleFunc("/api/register", api.HandleRegister)
-	http.HandleFunc("/api/create-checkout-session", api.HandleCreateCheckoutSession)
-	http.HandleFunc("/api/history", api.GetUserHistory)
-	http.HandleFunc("/api/profile", api.HandleGetProfile)
-	http.HandleFunc("/api/concerts", api.HandleConcerts)
-	http.HandleFunc("/api/confirm-payment", api.HandlePaymentConfirm)
-	http.HandleFunc("/api/favorites", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet || r.Method == "OPTIONS" {
-			api.HandleGetFavorites(w, r)
-		} else if r.Method == http.MethodPost {
-			api.HandleAddFavorite(w, r)
-		} else {
-			http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
-		}
-	})
+	// 2. Définition des routes (utilisant les features)
+
+	// --- AUTH ---
+	http.HandleFunc("/api/login", auth.HandleLogin)
+	http.HandleFunc("/api/register", auth.HandleRegister)
+
+	// --- ARTISTS ---
+	http.HandleFunc("/api/artists", artists.HandleArtists)
+	http.HandleFunc("/api/artists/", artists.HandleArtists)
+
+	// --- DEEZER (Indispensable pour les sons et albums) ---
+	http.HandleFunc("/api/deezer/search", artists.HandleDeezerSearch)
+	http.HandleFunc("/api/deezer/albums", artists.HandleDeezerAlbums)
+	http.HandleFunc("/api/deezer/top-tracks", artists.HandleDeezerTopTracks)
+
+	// --- USER ---
+	http.HandleFunc("/api/profile", user.HandleGetProfile)
+	http.HandleFunc("/api/history", user.GetUserHistory)
+	http.HandleFunc("/api/favorites", user.HandleFavorites)
+
+	// --- PAYMENT ---
+	http.HandleFunc("/api/create-checkout-session", payment.HandleCreateCheckoutSession)
+	http.HandleFunc("/api/confirm-payment", payment.HandlePaymentConfirm)
+
+	// 3. Application du Middleware Global (CORS)
+	handler := core.CORSMiddleware(http.DefaultServeMux)
 
 	port := ":8080"
-	fmt.Println("🚀 REST API Server started on http://localhost" + port)
-	log.Fatal(http.ListenAndServe(port, nil))
+	fmt.Println("🚀 Professional REST API Server started on http://localhost" + port)
+	log.Fatal(http.ListenAndServe(port, handler))
 }
