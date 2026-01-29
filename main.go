@@ -28,6 +28,7 @@ func main() {
 	http.HandleFunc("/api/register", api.HandleRegister)
 	http.HandleFunc("/api/create-checkout-session", api.HandleCreateCheckoutSession)
 	http.HandleFunc("/api/history", api.GetUserHistory)
+	http.HandleFunc("/api/profile", api.HandleGetProfile)
 	http.HandleFunc("/api/concerts", api.HandleConcerts)
 	http.HandleFunc("/api/confirm-payment", api.HandlePaymentConfirm)
 	http.HandleFunc("/api/favorites", func(w http.ResponseWriter, r *http.Request) {
