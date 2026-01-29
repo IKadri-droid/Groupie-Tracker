@@ -12,7 +12,7 @@ func VerifAdmin(r *http.Request) bool {
 		return false
 	}
 
-	tokenString := strings.TrimPrefix(authHeader, "Bearer")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 	claims, err := services.ValidateToken(tokenString)
 	if err != nil {
