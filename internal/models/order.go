@@ -74,7 +74,7 @@ func GetOrderDetailsForEmail(stripeSessionID string) (email, username, artist, l
 			u.email, u.username, 
 			COALESCE(a.name, 'Artiste Inconnu'), 
 			COALESCE(c.location, 'Lieu non spécifié'), 
-			COALESCE(c.date, 'Date à confirmer'), 
+			COALESCE(CAST(c.date AS VARCHAR), 'Date à confirmer'), 
 			COALESCE(c.venue, 'Salle à confirmer'),
 			o.amount
 		FROM orders o

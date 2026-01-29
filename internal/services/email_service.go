@@ -6,30 +6,6 @@ import (
 	"os"
 )
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-// SendTicketEmail envoie un mail de confirmation avec les détails du concert
-func SendTicketEmail(toEmail string, location string, date string, venue string) error {
-	// 1. Configuration de l'expéditeur (ton adresse mail de projet)
-=======
-func SendTicketEmail(toEmail, username, artist, location, date, venue string, amount float64, sessionID string) error {
->>>>>>> email
-	from := os.Getenv("EMAIL_SENDER")
-	password := os.Getenv("EMAIL_PASSWORD")
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
-
-	subject := fmt.Sprintf("Subject: 🎫 Votre billet pour %s - %s\n", artist, venue)
-	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-
-	shortID := sessionID
-	if len(sessionID) > 8 {
-		shortID = sessionID[len(sessionID)-8:]
-	}
-
-<<<<<<< HEAD
-	return nil
-=======
 func SendTicketEmail(toEmail, username, artist, location, date, venue string, amount float64, sessionID string) error {
 	from := os.Getenv("EMAIL_SENDER")
 	password := os.Getenv("EMAIL_PASSWORD")
@@ -45,8 +21,6 @@ func SendTicketEmail(toEmail, username, artist, location, date, venue string, am
 		shortID = sessionID[len(sessionID)-8:]
 	}
 
-=======
->>>>>>> email
 	body := fmt.Sprintf(`
 <!DOCTYPE html>
 <html>
@@ -86,8 +60,4 @@ func SendTicketEmail(toEmail, username, artist, location, date, venue string, am
 	message := []byte(subject + mime + body)
 	auth := smtp.PlainAuth("", from, password, smtpHost)
 	return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{toEmail}, message)
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
->>>>>>> email
 }

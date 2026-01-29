@@ -1,7 +1,9 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
+	"groupie/internal/config"
 	"groupie/internal/models"
 	"groupie/internal/services"
 	"log"
@@ -134,24 +136,44 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
+		// 1. On vérifie l'état actuel de la commande en base
+		var currentStatus string
+		q := "SELECT status FROM orders WHERE stripe_session_id = $1 LIMIT 1"
+		err = config.DB.QueryRow(q, s.ID).Scan(&currentStatus)
+		if err != nil && err != sql.ErrNoRows {
+			log.Println("❌ Impossible de vérifier le statut de la commande :", err)
+		}
+
+		// 2. Si elle est déjà payée, on ne renvoie pas le mail
+		if currentStatus == "paid" {
+			log.Println("ℹ️ Commande déjà traitée pour la session :", s.ID)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{
+				"status":  "success",
+				"message": "Paiement déjà confirmé.",
+			})
+			return
+		}
+
+		// 3. On met à jour NOTRE base de données
 		err = models.UpdateOrderStatusByStripeID(s.ID, "paid")
 		if err != nil {
 			http.Error(w, "Erreur lors de la mise à jour de la commande", http.StatusInternalServerError)
 			return
 		}
 
-		// 1. On récupère les infos étendues
+		// 4. On récupère les infos étendues
 		email, user, artist, loc, date, venue, amount, err := models.GetOrderDetailsForEmail(s.ID)
 		if err != nil {
 			log.Println("❌ Erreur récupération détails :", err)
 		} else {
 			log.Println("📧 Envoi du mail complet à :", email)
 			go func() {
-				// 2. On passe TOUTES les variables ici
+				// 5. On lance l'envoi
 				if err := services.SendTicketEmail(email, user, artist, loc, date, venue, amount, s.ID); err != nil {
 					log.Println("❌ Erreur SMTP :", err)
 				} else {
-					log.Println("✅ Mail envoyé !")
+					log.Println("✅ Mail envoyé avec succès !")
 				}
 			}()
 		}
