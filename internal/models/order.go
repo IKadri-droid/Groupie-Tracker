@@ -66,3 +66,16 @@ func GetOrdersByUserID(userID int) ([]OrderHistory, error) {
 
 	return history, nil
 }
+
+// GetOrderDetailsForEmail récupère les infos nécessaires pour envoyer le ticket par mail
+func GetOrderDetailsForEmail(stripeSessionID string) (email string, location string, date string, venue string, err error) {
+	query := `
+		SELECT users.email, concerts.location, concerts.date, concerts.venue
+		FROM orders
+		JOIN users ON orders.user_id = users.id
+		JOIN concerts ON orders.concert_id = concerts.id
+		WHERE orders.stripe_session_id = $1
+	`
+	err = config.DB.QueryRow(query, stripeSessionID).Scan(&email, &location, &date, &venue)
+	return
+}
