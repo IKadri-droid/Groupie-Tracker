@@ -42,7 +42,7 @@ func UpdateOrderStatusByStripeID(stripeSessionID string, status string) error {
 }
 
 func GetOrdersByUserID(userID int) ([]OrderHistory, error) {
-	query := `SELECT orders.id, orders.amount, orders.status, concerts.location, concerts.date, concerts.venue, concerts.image_concert
+	query := `SELECT orders.id, orders.amount, orders.status, concerts.location, concerts.date, concerts.venue, concerts.concert_image
               FROM orders
               JOIN concerts ON orders.concert_id = concerts.id
               WHERE orders.user_id = $1`
@@ -68,14 +68,23 @@ func GetOrdersByUserID(userID int) ([]OrderHistory, error) {
 }
 
 // GetOrderDetailsForEmail récupère les infos nécessaires pour envoyer le ticket par mail
-func GetOrderDetailsForEmail(stripeSessionID string) (email string, location string, date string, venue string, err error) {
+func GetOrderDetailsForEmail(stripeSessionID string) (email, username, artist, location, date, venue string, amount float64, err error) {
 	query := `
-		SELECT users.email, concerts.location, concerts.date, concerts.venue
-		FROM orders
-		JOIN users ON orders.user_id = users.id
-		JOIN concerts ON orders.concert_id = concerts.id
-		WHERE orders.stripe_session_id = $1
+		SELECT 
+			u.email, u.username, 
+			COALESCE(a.name, 'Artiste Inconnu'), 
+			COALESCE(c.location, 'Lieu non spécifié'), 
+			COALESCE(c.date, 'Date à confirmer'), 
+			COALESCE(c.venue, 'Salle à confirmer'),
+			o.amount
+		FROM orders o
+		JOIN users u ON o.user_id = u.id
+		LEFT JOIN concerts c ON o.concert_id = c.id
+		LEFT JOIN artists a ON c.artist_id = a.id
+		WHERE o.stripe_session_id = $1
 	`
-	err = config.DB.QueryRow(query, stripeSessionID).Scan(&email, &location, &date, &venue)
+	err = config.DB.QueryRow(query, stripeSessionID).Scan(
+		&email, &username, &artist, &location, &date, &venue, &amount,
+	)
 	return
 }
