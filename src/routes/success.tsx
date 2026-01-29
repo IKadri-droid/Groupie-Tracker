@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
@@ -18,13 +18,14 @@ function SuccessComponent() {
     const { session_id } = useSearch({ from: "/success" }) as { session_id?: string };
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
     const navigate = useNavigate();
+    const hasRun = useRef(false);
 
     useEffect(() => {
-        if (!session_id) {
-            setStatus("error");
+        if (!session_id || hasRun.current) {
             return;
         }
 
+        hasRun.current = true;
         const confirmPayment = async () => {
             try {
                 const response = await fetch("http://localhost:8080/api/confirm-payment", {
