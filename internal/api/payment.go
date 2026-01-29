@@ -155,14 +155,25 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// 3. On met à jour NOTRE base de données
-		err = models.UpdateOrderStatusByStripeID(s.ID, "paid")
+		// 3. On met à jour NOTRE base de données de manière atomique
+		rowsAffected, err := models.UpdateOrderStatusByStripeID(s.ID, "paid")
 		if err != nil {
 			http.Error(w, "Erreur lors de la mise à jour de la commande", http.StatusInternalServerError)
 			return
 		}
 
-		// 4. On récupère les infos étendues
+		// 4. Si aucune ligne n'a été modifiée, c'est que c'est déjà fait ! (Sécurité anti-doublon)
+		if rowsAffected == 0 {
+			log.Println("ℹ️ Commande déjà traitée (RowsAffected=0), on n'envoie pas de second mail.")
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{
+				"status":  "success",
+				"message": "Paiement déjà validé.",
+			})
+			return
+		}
+
+		// 5. On récupère les infos étendues pour le mail
 		email, user, artist, loc, date, venue, amount, err := models.GetOrderDetailsForEmail(s.ID)
 		if err != nil {
 			log.Println("❌ Erreur récupération détails :", err)

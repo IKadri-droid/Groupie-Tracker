@@ -35,10 +35,14 @@ func CreateOrder(order *Order) error {
 	return nil
 }
 
-func UpdateOrderStatusByStripeID(stripeSessionID string, status string) error {
-	query := `UPDATE orders SET status = $1 WHERE stripe_session_id = $2`
-	_, err := config.DB.Exec(query, status, stripeSessionID)
-	return err
+func UpdateOrderStatusByStripeID(stripeSessionID string, status string) (int64, error) {
+	// On n'update que si le statut n'est pas déjà celui qu'on veut mettre
+	query := `UPDATE orders SET status = $1 WHERE stripe_session_id = $2 AND status != $1`
+	res, err := config.DB.Exec(query, status, stripeSessionID)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
 }
 
 func GetOrdersByUserID(userID int) ([]OrderHistory, error) {
