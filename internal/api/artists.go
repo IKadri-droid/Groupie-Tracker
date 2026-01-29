@@ -33,21 +33,21 @@ func HandleArtists(w http.ResponseWriter, r *http.Request) {
 		}
 	case "POST":
 
-		if !IsAdmin(r) {
+		if !VerifAdmin(r) {
 			http.Error(w, "Accès interdit : Administrateurs uniquement", http.StatusForbidden)
 			return
 		}
 		createArtist(w, r)
 	case "PUT":
 
-		if !IsAdmin(r) {
+		if !VerifAdmin(r) {
 			http.Error(w, "Accès interdit : Administrateurs uniquement", http.StatusForbidden)
 			return
 		}
 		updateArtist(w, r, path)
 	case "DELETE":
 
-		if !IsAdmin(r) {
+		if !VerifAdmin(r) {
 			http.Error(w, "Accès interdit : Administrateurs uniquement", http.StatusForbidden)
 			return
 		}
