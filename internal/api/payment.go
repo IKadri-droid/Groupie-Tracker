@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"groupie/internal/models"
 	"groupie/internal/services"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -65,8 +66,8 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 			"card",
 		}),
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String("http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}"),
-		CancelURL:  stripe.String("http://localhost:5173/cancel"),
+		SuccessURL: stripe.String("http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}"),
+		CancelURL:  stripe.String("http://localhost:3000/cancel"),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
@@ -117,25 +118,27 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+	var sessionID string
+	// Si c'est un POST (depuis le front), on lit le JSON
+	if r.Method == http.MethodPost {
+		var requestData struct {
+			SessionID string `json:"session_id"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&requestData); err == nil {
+			sessionID = requestData.SessionID
+		}
+	} else {
+		// Si c'est un GET (depuis ton navigateur), on lit l'URL
+		sessionID = r.URL.Query().Get("session_id")
+	}
+	if sessionID == "" {
+		http.Error(w, "ID de session manquant", http.StatusBadRequest)
 		return
 	}
-
-	var requestData struct {
-		SessionID string `json:"session_id"`
-	}
-	err := json.NewDecoder(r.Body).Decode(&requestData)
-	if err != nil {
-		http.Error(w, "Données JSON invalides", http.StatusBadRequest)
-		return
-	}
-
-	// 1. On configure Stripe
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 
 	// 2. On demande à Stripe les détails de cette session
-	s, err := session.Get(requestData.SessionID, nil)
+	s, err := session.Get(sessionID, nil)
 	if err != nil {
 		http.Error(w, "Session introuvable chez Stripe", http.StatusNotFound)
 		return
@@ -148,6 +151,20 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Erreur lors de la mise à jour de la commande", http.StatusInternalServerError)
 			return
+		}
+
+		email, loc, date, venue, err := models.GetOrderDetailsForEmail(s.ID)
+		if err != nil {
+			log.Println("❌ Erreur base de données :", err)
+		} else {
+			log.Println("📧 Tentative d'envoi d'email à :", email)
+			go func() {
+				if err := services.SendTicketEmail(email, loc, date, venue); err != nil {
+					log.Println("❌ Erreur SMTP :", err)
+				} else {
+					log.Println("✅ Email envoyé avec succès !")
+				}
+			}()
 		}
 
 		w.Header().Set("Content-Type", "application/json")
