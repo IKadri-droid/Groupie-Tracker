@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"groupie/internal/config"
 	"groupie/internal/models"
 	"groupie/internal/services"
 	"net/http"
@@ -133,6 +134,18 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
+		// On vérifie si déjà payé pour éviter les doublons
+		var currentStatus string
+		err = config.DB.QueryRow("SELECT status FROM orders WHERE stripe_session_id = $1", s.ID).Scan(&currentStatus)
+		if err == nil && currentStatus == "paid" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{
+				"status":  "success",
+				"message": "Paiement déjà confirmé.",
+			})
+			return
+		}
+
 		err = models.UpdateOrderStatusByStripeID(s.ID, "paid")
 		if err != nil {
 			http.Error(w, "Erreur lors de la mise à jour de la commande", http.StatusInternalServerError)
