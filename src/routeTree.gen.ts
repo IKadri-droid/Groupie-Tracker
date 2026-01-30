@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as PreCheckoutRouteImport } from './routes/pre-checkout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as CancelRouteImport } from './routes/cancel'
 import { Route as IndexRouteImport } from './routes/index'
@@ -31,6 +32,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const ProfilRoute = ProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreCheckoutRoute = PreCheckoutRouteImport.update({
+  id: '/pre-checkout',
+  path: '/pre-checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cancel': typeof CancelRoute
   '/login': typeof LoginRoute
+  '/pre-checkout': typeof PreCheckoutRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
   '/success': typeof SuccessRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cancel': typeof CancelRoute
   '/login': typeof LoginRoute
+  '/pre-checkout': typeof PreCheckoutRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
   '/success': typeof SuccessRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/cancel': typeof CancelRoute
   '/login': typeof LoginRoute
+  '/pre-checkout': typeof PreCheckoutRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
   '/success': typeof SuccessRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cancel'
     | '/login'
+    | '/pre-checkout'
     | '/profil'
     | '/register'
     | '/success'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cancel'
     | '/login'
+    | '/pre-checkout'
     | '/profil'
     | '/register'
     | '/success'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cancel'
     | '/login'
+    | '/pre-checkout'
     | '/profil'
     | '/register'
     | '/success'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CancelRoute: typeof CancelRoute
   LoginRoute: typeof LoginRoute
+  PreCheckoutRoute: typeof PreCheckoutRoute
   ProfilRoute: typeof ProfilRoute
   RegisterRoute: typeof RegisterRoute
   SuccessRoute: typeof SuccessRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/profil'
       fullPath: '/profil'
       preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pre-checkout': {
+      id: '/pre-checkout'
+      path: '/pre-checkout'
+      fullPath: '/pre-checkout'
+      preLoaderRoute: typeof PreCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -199,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CancelRoute: CancelRoute,
   LoginRoute: LoginRoute,
+  PreCheckoutRoute: PreCheckoutRoute,
   ProfilRoute: ProfilRoute,
   RegisterRoute: RegisterRoute,
   SuccessRoute: SuccessRoute,

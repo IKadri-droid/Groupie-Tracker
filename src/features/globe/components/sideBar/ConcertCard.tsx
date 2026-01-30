@@ -73,7 +73,10 @@ export default function ConcertCard({
                       Heure
                     </div>
                     <div className="text-white font-medium">
-                      {concert.time || "20:00"}
+                      {new Date(concert.date).toLocaleTimeString("fr-FR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
                   </div>
 
@@ -105,7 +108,22 @@ export default function ConcertCard({
                     className="flex-1 bg-white text-black font-bold py-2 px-4 rounded-lg text-sm hover:bg-white/90 transition-colors flex items-center justify-center gap-2"
                     onClick={(e) => {
                       e.stopPropagation();
-                      window.open(concert.ticket_url || "#", "_blank");
+                      navigate({
+                        to: "/pre-checkout",
+                        search: {
+                          artistName: concert.artistName,
+                          image_concert: concert.concert_image,
+                          image:
+                            concert.artistImage ||
+                            "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=2070&auto=format&fit=crop",
+                          venue: concert.venue || "TBA",
+                          date: concert.date,
+                          city:
+                            concert.location.split("-")[0] || concert.location,
+                          price: concert.price?.toString() || "45",
+                          concertId: concert.id,
+                        },
+                      });
                     }}
                   >
                     <Ticket className="h-4 w-4" />

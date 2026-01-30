@@ -20,4 +20,5 @@ export interface Concert {
   venue: string;
   price: string;
   available_seats: number;
+  concert_image: string
 }
