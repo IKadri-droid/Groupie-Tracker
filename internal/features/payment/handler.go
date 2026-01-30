@@ -60,9 +60,6 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	userID := int(userIDFloat)
 
 	var req struct {
-<<<<<<< HEAD
-		ConcertID int `json:"concert_id"`
-=======
 		ConcertID   int `json:"concert_id"`
 		Quantity    int `json:"quantity"`
 		VipQuantity int `json:"vip_quantity"`
@@ -112,48 +109,18 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	if len(lineItems) == 0 {
 		http.Error(w, "Veuillez sélectionner au moins un billet", http.StatusBadRequest)
 		return
->>>>>>> main
 	}
-
-	// 1. Récupération du prix dynamique
-	concertPrice, err := getConcertPrice(req.ConcertID)
-	if err != nil || concertPrice <= 0 {
-		http.Error(w, "Impossible de récupérer le prix du concert", http.StatusBadRequest)
-		return
-	}
-
-	// 2. Conversion en centimes pour Stripe (ex: 113.00 => 11300)
-	priceInCents := int64(concertPrice * 100)
 
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 	params := &stripe.CheckoutSessionParams{
 		SuccessURL: stripe.String("http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}"),
 		CancelURL:  stripe.String("http://localhost:3000/cancel"),
-<<<<<<< HEAD
-		LineItems: []*stripe.CheckoutSessionLineItemParams{{
-			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-				Currency:    stripe.String("eur"),
-				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{Name: stripe.String("Billet de Concert")},
-				UnitAmount:  stripe.Int64(priceInCents), // Utilisation du prix dynamique
-			},
-			Quantity: stripe.Int64(1),
-		}},
-		Mode: stripe.String(string(stripe.CheckoutSessionModePayment)),
-=======
 		LineItems:  lineItems,
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
->>>>>>> main
 	}
 
 	s, _ := session.New(params)
 
-<<<<<<< HEAD
-	// 3. Sauvegarde de la commande avec le montant exact
-	order := &Order{
-		UserID:          userID,
-		ConcertID:       req.ConcertID,
-		Amount:          concertPrice, // Prix dynamique
-=======
 	// 3. Calcul du montant total réel et sauvegarde
 	totalAmount := (concertPrice * float64(req.Quantity)) + (concertPrice * 2.5 * float64(req.VipQuantity))
 
@@ -161,7 +128,6 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		UserID:          userID,
 		ConcertID:       req.ConcertID,
 		Amount:          totalAmount,
->>>>>>> main
 		Status:          "pending",
 		StripeSessionID: s.ID,
 	}
