@@ -47,7 +47,6 @@ func getConcertPrice(concertID int) (float64, error) {
 
 // HandleCreateCheckoutSession va gérer l'appel du frontend
 func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
-	// 1. Autorisation et Sécurité
 	EnableCORS(w)
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
@@ -58,7 +57,6 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extraction du token JWT
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		http.Error(w, "Token manquant", http.StatusUnauthorized)
@@ -71,7 +69,6 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// On récupère l'ID utilisateur (attention, le type peut être float64 après JSON decoding du JWT)
 	userIDFloat, ok := claims["id"].(float64)
 	if !ok {
 		http.Error(w, "Utilisateur non identifié", http.StatusUnauthorized)
@@ -79,7 +76,6 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	}
 	userID := int(userIDFloat)
 
-	// 2. Lecture des données envoyées par le front
 	var requestData struct {
 		ConcertID int `json:"concert_id"`
 	}
@@ -89,6 +85,7 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+<<<<<<< HEAD
 	// 3. Récupération du prix dynamique
 	concertPrice, err := getConcertPrice(requestData.ConcertID)
 	if err != nil || concertPrice <= 0 {
@@ -103,13 +100,17 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 
 	// 5. On remplit le "dossier" de paiement (params)
+=======
+	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+
+>>>>>>> 16887e1a2bdd53392d1f0115dac6a440212529e7
 	params := &stripe.CheckoutSessionParams{
 		PaymentMethodTypes: stripe.StringSlice([]string{
 			"card",
 		}),
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String("http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}"),
-		CancelURL:  stripe.String("http://localhost:5173/cancel"),
+		SuccessURL: stripe.String("http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}"),
+		CancelURL:  stripe.String("http://localhost:3000/cancel"),
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
@@ -124,14 +125,16 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	// 5. ACTION : On envoie le dossier à Stripe
 	s, err := session.New(params)
 	if err != nil {
 		http.Error(w, "Erreur Stripe: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+<<<<<<< HEAD
 	// 7. Sauvegarde en base de données
+=======
+>>>>>>> 16887e1a2bdd53392d1f0115dac6a440212529e7
 	order := models.Order{
 		UserID:          userID,
 		ConcertID:       requestData.ConcertID,
@@ -146,7 +149,6 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 7. RÉPONSE : On renvoie l'URL de paiement au frontend
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"url": s.URL,
@@ -174,19 +176,27 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 1. On configure Stripe
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 
-	// 2. On demande à Stripe les détails de cette session
 	s, err := session.Get(requestData.SessionID, nil)
 	if err != nil {
 		http.Error(w, "Session introuvable chez Stripe", http.StatusNotFound)
 		return
 	}
 
-	// 3. Si le paiement est bien confirmé
 	if s.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
-		// On met à jour NOTRE base de données
+		// On vérifie si déjà payé pour éviter les doublons
+		var currentStatus string
+		err = config.DB.QueryRow("SELECT status FROM orders WHERE stripe_session_id = $1", s.ID).Scan(&currentStatus)
+		if err == nil && currentStatus == "paid" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{
+				"status":  "success",
+				"message": "Paiement déjà confirmé.",
+			})
+			return
+		}
+
 		err = models.UpdateOrderStatusByStripeID(s.ID, "paid")
 		if err != nil {
 			http.Error(w, "Erreur lors de la mise à jour de la commande", http.StatusInternalServerError)
