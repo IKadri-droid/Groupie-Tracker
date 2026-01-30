@@ -155,16 +155,24 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 
 		if affected > 0 {
 			log.Printf("✅ Commande %s payée ! Envoi email...\n", s.ID)
-			email, user, artist, loc, date, venue, amount, err := GetOrderDetailsForEmail(s.ID)
+			dbEmail, user, artist, loc, date, venue, amount, err := GetOrderDetailsForEmail(s.ID)
+
+			// Si Stripe nous donne un email (celui saisi au paiement), on l'utilise en priorité
+			emailToSend := dbEmail
+			if s.CustomerDetails != nil && s.CustomerDetails.Email != "" {
+				emailToSend = s.CustomerDetails.Email
+				log.Printf("ℹ️ Utilisation de l'email Stripe : %s\n", emailToSend)
+			}
+
 			if err != nil {
 				log.Printf("❌ Erreur récupération détails email: %v\n", err)
 			} else {
 				// Lancement asynchrone mais avec log
 				go func() {
-					if err := SendTicketEmail(email, user, artist, loc, date, venue, amount, s.ID); err != nil {
-						log.Printf("❌ ERREUR ENVOI EMAIL à %s: %v\n", email, err)
+					if err := SendTicketEmail(emailToSend, user, artist, loc, date, venue, amount, s.ID); err != nil {
+						log.Printf("❌ ERREUR ENVOI EMAIL à %s: %v\n", emailToSend, err)
 					} else {
-						log.Printf("✉️ Email envoyé avec succès à %s\n", email)
+						log.Printf("✉️ Email envoyé avec succès à %s\n", emailToSend)
 					}
 				}()
 			}
