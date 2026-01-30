@@ -85,7 +85,6 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
 	// 3. Récupération du prix dynamique
 	concertPrice, err := getConcertPrice(requestData.ConcertID)
 	if err != nil || concertPrice <= 0 {
@@ -100,10 +99,6 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 
 	// 5. On remplit le "dossier" de paiement (params)
-=======
-	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
-
->>>>>>> 16887e1a2bdd53392d1f0115dac6a440212529e7
 	params := &stripe.CheckoutSessionParams{
 		PaymentMethodTypes: stripe.StringSlice([]string{
 			"card",
@@ -131,10 +126,7 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
 	// 7. Sauvegarde en base de données
-=======
->>>>>>> 16887e1a2bdd53392d1f0115dac6a440212529e7
 	order := models.Order{
 		UserID:          userID,
 		ConcertID:       requestData.ConcertID,
