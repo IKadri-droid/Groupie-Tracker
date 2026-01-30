@@ -1,15 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Heart, Share2, MapPin, Tag, Plus } from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
 const concertSearchSchema = z.object({
   artistName: z.string(),
   image: z.string().optional(),
+  image_concert: z.string().optional(),
   venue: z.string().optional(),
   date: z.string(),
   city: z.string().optional(),
   price: z.string().optional(),
+  concertId: z.number().optional(),
 });
 
 export const Route = createFileRoute("/pre-checkout")({
@@ -17,10 +19,22 @@ export const Route = createFileRoute("/pre-checkout")({
   component: RouteComponent,
 });
 
+import { useAuthStore } from "../features/auth/store/authStore";
+
 function RouteComponent() {
-  const { artistName, image, venue, date, city, price } = Route.useSearch();
+  const {
+    artistName,
+    image,
+    image_concert,
+    venue,
+    date,
+    city,
+    price,
+    concertId,
+  } = Route.useSearch();
   const [standardQty, setStandardQty] = useState(0);
   const [vipQty, setVipQty] = useState(0);
+  const { token, user } = useAuthStore();
 
   // Parse price safely or default to 45
   const basePrice = price ? parseFloat(price.replace(/[^0-9.]/g, "")) : 45;
@@ -28,6 +42,67 @@ function RouteComponent() {
   const PRICE_VIP = Math.round(basePrice * 2.5); // VIP is roughly 2.5x standard
 
   const total = standardQty * PRICE_STANDARD + vipQty * PRICE_VIP;
+
+  const handlePayment = async () => {
+    // Debug: afficher l'état du token
+    console.log(
+      "Token présent:",
+      !!token,
+      "Token value:",
+      token?.substring(0, 20) + "...",
+    );
+    console.log("User connecté:", !!user, user);
+    console.log("Concert ID:", concertId);
+
+    if (!token || !user) {
+      alert(
+        "Veuillez vous connecter pour procéder au paiement. Token: " +
+          (token ? "présent" : "absent"),
+      );
+      return;
+    }
+
+    if (standardQty === 0 && vipQty === 0) {
+      alert("Veuillez sélectionner au moins un billet.");
+      return;
+    }
+
+    // NOTE: Le backend actuel ne gère pas encore les quantités/types de billets
+    // On envoie juste concert_id pour l'instant comme demandé
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/create-checkout-session",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            concert_id: concertId,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Erreur backend:", response.status, errorText);
+        if (response.status === 401) {
+          alert("Session expirée. Veuillez vous reconnecter.");
+          return;
+        }
+        throw new Error(`Erreur ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Erreur paiement:", error);
+      alert("Une erreur est survenue lors de l'initialisation du paiement.");
+    }
+  };
 
   return (
     <div className="min-h-screen text-white relative">
@@ -48,7 +123,7 @@ function RouteComponent() {
           <div className="relative w-full max-w-sm aspect-square rounded-3xl overflow-hidden shadow-2xl shadow-indigo-500/20 group">
             <img
               src={
-                image ||
+                image_concert ||
                 "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=2070&auto=format&fit=crop"
               }
               alt={artistName}
@@ -73,12 +148,12 @@ function RouteComponent() {
 
             {/* Date (En jaune/lime comme sur ta maquette pour le contraste) */}
             <p className="text-lime-300 font-bold text-lg mb-4">
-              {new Date(date).toLocaleDateString("en-US", {
-                weekday: "short",
-                month: "short",
+              {new Date(date).toLocaleDateString("fr-FR", {
+                weekday: "long",
                 day: "numeric",
-                hour: "numeric",
-                minute: "numeric",
+                month: "long",
+                hour: "2-digit",
+                minute: "2-digit",
               })}
             </p>
 
@@ -194,7 +269,10 @@ function RouteComponent() {
                 <span className="text-sm text-slate-400">Total</span>
                 <span className="text-2xl font-bold">{total.toFixed(2)} €</span>
               </div>
-              <button className="bg-lime-400 text-black px-8 py-3 rounded-xl font-bold hover:bg-lime-300 transition-colors hover:scale-105 active:scale-95">
+              <button
+                onClick={handlePayment}
+                className="bg-lime-400 text-black px-8 py-3 rounded-xl font-bold hover:bg-lime-300 transition-colors hover:scale-105 active:scale-95"
+              >
                 Payer
               </button>
             </div>

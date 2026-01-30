@@ -112,6 +112,7 @@ export default function ConcertCard({
                         to: "/pre-checkout",
                         search: {
                           artistName: concert.artistName,
+                          image_concert: concert.concert_image,
                           image:
                             concert.artistImage ||
                             "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=2070&auto=format&fit=crop",
@@ -120,6 +121,7 @@ export default function ConcertCard({
                           city:
                             concert.location.split("-")[0] || concert.location,
                           price: concert.price?.toString() || "45",
+                          concertId: concert.id,
                         },
                       });
                     }}
