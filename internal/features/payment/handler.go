@@ -1,15 +1,47 @@
 package payment
 
 import (
+	"database/sql"
 	"encoding/json"
 	"groupie/internal/core"
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/checkout/session"
 )
+
+// Helper pour récupérer le prix dynamiquement depuis la DB
+func getConcertPrice(concertID int) (float64, error) {
+	var priceStr sql.NullString
+	query := `SELECT price FROM concerts WHERE id = $1`
+
+	err := core.DB.QueryRow(query, concertID).Scan(&priceStr)
+	if err != nil {
+		return 0, err
+	}
+	if !priceStr.Valid {
+		return 0, nil
+	}
+
+	// Nettoyage de la chaîne de caractères (ex: "113,00 €" -> "113.00")
+	cleanedPrice := strings.Map(func(r rune) rune {
+		if (r >= '0' && r <= '9') || r == '.' || r == ',' {
+			return r
+		}
+		return -1
+	}, priceStr.String)
+	cleanedPrice = strings.ReplaceAll(cleanedPrice, ",", ".")
+
+	if cleanedPrice == "" {
+		return 0, nil
+	}
+
+	return strconv.ParseFloat(cleanedPrice, 64)
+}
 
 func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
@@ -20,11 +52,27 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := int(claims["id"].(float64))
+	userIDFloat, ok := claims["id"].(float64)
+	if !ok {
+		// Fallback si float64 échoue (cas où JWT stocke int)
+		userIDFloat = float64(claims["id"].(int))
+	}
+	userID := int(userIDFloat)
+
 	var req struct {
 		ConcertID int `json:"concert_id"`
 	}
 	json.NewDecoder(r.Body).Decode(&req)
+
+	// 1. Récupération du prix dynamique
+	concertPrice, err := getConcertPrice(req.ConcertID)
+	if err != nil || concertPrice <= 0 {
+		http.Error(w, "Impossible de récupérer le prix du concert", http.StatusBadRequest)
+		return
+	}
+
+	// 2. Conversion en centimes pour Stripe (ex: 113.00 => 11300)
+	priceInCents := int64(concertPrice * 100)
 
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 	params := &stripe.CheckoutSessionParams{
@@ -33,8 +81,8 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		LineItems: []*stripe.CheckoutSessionLineItemParams{{
 			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 				Currency:    stripe.String("eur"),
-				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{Name: stripe.String("Billet")},
-				UnitAmount:  stripe.Int64(2000),
+				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{Name: stripe.String("Billet de Concert")},
+				UnitAmount:  stripe.Int64(priceInCents), // Utilisation du prix dynamique
 			},
 			Quantity: stripe.Int64(1),
 		}},
@@ -42,7 +90,17 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s, _ := session.New(params)
-	CreateOrder(&Order{UserID: userID, ConcertID: req.ConcertID, Amount: 20, Status: "pending", StripeSessionID: s.ID})
+
+	// 3. Sauvegarde de la commande avec le montant exact
+	order := &Order{
+		UserID:          userID,
+		ConcertID:       req.ConcertID,
+		Amount:          concertPrice, // Prix dynamique
+		Status:          "pending",
+		StripeSessionID: s.ID,
+	}
+	CreateOrder(order)
+
 	json.NewEncoder(w).Encode(map[string]string{"url": s.URL})
 }
 
@@ -56,10 +114,30 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 	s, _ := session.Get(req.SessionID, nil)
 
 	if s.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
-		affected, _ := UpdateOrderStatusByStripeID(s.ID, "paid")
+		affected, err := UpdateOrderStatusByStripeID(s.ID, "paid")
+		if err != nil {
+			log.Printf("❌ Erreur DB UpdateOrder: %v\n", err)
+			http.Error(w, "Erreur mise à jour commande", http.StatusInternalServerError)
+			return
+		}
+
 		if affected > 0 {
-			email, user, artist, loc, date, venue, amount, _ := GetOrderDetailsForEmail(s.ID)
-			go SendTicketEmail(email, user, artist, loc, date, venue, amount, s.ID)
+			log.Printf("✅ Commande %s payée ! Envoi email...\n", s.ID)
+			email, user, artist, loc, date, venue, amount, err := GetOrderDetailsForEmail(s.ID)
+			if err != nil {
+				log.Printf("❌ Erreur récupération détails email: %v\n", err)
+			} else {
+				// Lancement asynchrone mais avec log
+				go func() {
+					if err := SendTicketEmail(email, user, artist, loc, date, venue, amount, s.ID); err != nil {
+						log.Printf("❌ ERREUR ENVOI EMAIL à %s: %v\n", email, err)
+					} else {
+						log.Printf("✉️ Email envoyé avec succès à %s\n", email)
+					}
+				}()
+			}
+		} else {
+			log.Printf("⚠️ Commande %s déjà payée ou introuvable (affected: %d)\n", s.ID, affected)
 		}
 		json.NewEncoder(w).Encode(map[string]string{"status": "success"})
 	}
