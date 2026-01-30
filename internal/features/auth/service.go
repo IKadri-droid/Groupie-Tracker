@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"groupie/internal/core"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -22,7 +23,19 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 func VerifyRecaptcha(token string) (bool, error) {
+	// Bypass pour le développement
+	if token == "dev-bypass-token" {
+		log.Println("ℹ️  reCAPTCHA bypassed via dev-bypass-token")
+		return true, nil
+	}
+
 	secretKey := os.Getenv("RECAPTCHA_SECRET_KEY")
+
+	if secretKey == "" {
+		log.Println("⚠️  RECAPTCHA_SECRET_KEY non configurée dans le .env")
+		return true, nil // On laisse passer si non configuré pour pas bloquer le dev
+	}
+
 	verifyURL := "https://www.google.com/recaptcha/api/siteverify"
 
 	data := url.Values{}
@@ -31,6 +44,7 @@ func VerifyRecaptcha(token string) (bool, error) {
 
 	resp, err := http.PostForm(verifyURL, data)
 	if err != nil {
+		log.Println("❌ Erreur lors de la requête Recaptcha:", err)
 		return false, err
 	}
 	defer resp.Body.Close()
@@ -45,7 +59,17 @@ func VerifyRecaptcha(token string) (bool, error) {
 		return false, err
 	}
 
-	return recaptchaResp.Success && recaptchaResp.Score > 0.6, nil
+	if !recaptchaResp.Success {
+		return false, nil
+	}
+
+	// Si c'est du v3, on vérifie le score
+	if recaptchaResp.Score > 0 && recaptchaResp.Score < 0.5 {
+		log.Printf("⚠️  Recaptcha score trop faible: %v\n", recaptchaResp.Score)
+		return false, nil
+	}
+
+	return true, nil
 }
 
 // Database helper functions for Auth

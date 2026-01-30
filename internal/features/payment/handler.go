@@ -60,9 +60,60 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	userID := int(userIDFloat)
 
 	var req struct {
+<<<<<<< HEAD
 		ConcertID int `json:"concert_id"`
+=======
+		ConcertID   int `json:"concert_id"`
+		Quantity    int `json:"quantity"`
+		VipQuantity int `json:"vip_quantity"`
 	}
-	json.NewDecoder(r.Body).Decode(&req)
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Données invalides", http.StatusBadRequest)
+		return
+	}
+
+	// 1. Récupération du prix dynamique
+	concertPrice, err := getConcertPrice(req.ConcertID)
+	if err != nil || concertPrice <= 0 {
+		http.Error(w, "Impossible de récupérer le prix du concert", http.StatusBadRequest)
+		return
+	}
+
+	// 2. Préparation des montants pour Stripe
+	priceInCents := int64(concertPrice * 100)
+	vipPriceInCents := int64(concertPrice * 2.5 * 100)
+
+	// 3. Construction dynamique du panier Stripe (on n'ajoute que si quantité > 0)
+	var lineItems []*stripe.CheckoutSessionLineItemParams
+
+	if req.Quantity > 0 {
+		lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
+			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+				Currency:    stripe.String("eur"),
+				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{Name: stripe.String("Billet Standard")},
+				UnitAmount:  stripe.Int64(priceInCents),
+			},
+			Quantity: stripe.Int64(int64(req.Quantity)),
+		})
+	}
+
+	if req.VipQuantity > 0 {
+		lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
+			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+				Currency:    stripe.String("eur"),
+				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{Name: stripe.String("Billet VIP")},
+				UnitAmount:  stripe.Int64(vipPriceInCents),
+			},
+			Quantity: stripe.Int64(int64(req.VipQuantity)),
+		})
+	}
+
+	if len(lineItems) == 0 {
+		http.Error(w, "Veuillez sélectionner au moins un billet", http.StatusBadRequest)
+		return
+>>>>>>> main
+	}
 
 	// 1. Récupération du prix dynamique
 	concertPrice, err := getConcertPrice(req.ConcertID)
@@ -78,6 +129,7 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	params := &stripe.CheckoutSessionParams{
 		SuccessURL: stripe.String("http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}"),
 		CancelURL:  stripe.String("http://localhost:3000/cancel"),
+<<<<<<< HEAD
 		LineItems: []*stripe.CheckoutSessionLineItemParams{{
 			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 				Currency:    stripe.String("eur"),
@@ -87,15 +139,29 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 			Quantity: stripe.Int64(1),
 		}},
 		Mode: stripe.String(string(stripe.CheckoutSessionModePayment)),
+=======
+		LineItems:  lineItems,
+		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
+>>>>>>> main
 	}
 
 	s, _ := session.New(params)
 
+<<<<<<< HEAD
 	// 3. Sauvegarde de la commande avec le montant exact
 	order := &Order{
 		UserID:          userID,
 		ConcertID:       req.ConcertID,
 		Amount:          concertPrice, // Prix dynamique
+=======
+	// 3. Calcul du montant total réel et sauvegarde
+	totalAmount := (concertPrice * float64(req.Quantity)) + (concertPrice * 2.5 * float64(req.VipQuantity))
+
+	order := &Order{
+		UserID:          userID,
+		ConcertID:       req.ConcertID,
+		Amount:          totalAmount,
+>>>>>>> main
 		Status:          "pending",
 		StripeSessionID: s.ID,
 	}
