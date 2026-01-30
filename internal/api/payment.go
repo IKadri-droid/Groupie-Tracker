@@ -1,7 +1,11 @@
 package api
 
 import (
+	"database/sql"
+	"strconv"
+
 	"encoding/json"
+	"groupie/internal/config"
 	"groupie/internal/models"
 	"groupie/internal/services"
 	"net/http"
@@ -11,6 +15,35 @@ import (
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/checkout/session"
 )
+
+// Helper pour récupérer le prix dynamiquement depuis la DB
+func getConcertPrice(concertID int) (float64, error) {
+	var priceStr sql.NullString
+	query := `SELECT price FROM concerts WHERE id = $1`
+
+	err := config.DB.QueryRow(query, concertID).Scan(&priceStr)
+	if err != nil {
+		return 0, err
+	}
+	if !priceStr.Valid {
+		return 0, nil
+	}
+
+	// Nettoyage de la chaîne de caractères (ex: "113,00 €" -> "113.00")
+	cleanedPrice := strings.Map(func(r rune) rune {
+		if (r >= '0' && r <= '9') || r == '.' || r == ',' {
+			return r
+		}
+		return -1
+	}, priceStr.String)
+	cleanedPrice = strings.ReplaceAll(cleanedPrice, ",", ".")
+
+	if cleanedPrice == "" {
+		return 0, nil
+	}
+
+	return strconv.ParseFloat(cleanedPrice, 64)
+}
 
 // HandleCreateCheckoutSession va gérer l'appel du frontend
 func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
@@ -56,10 +89,20 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 3. Configuration de Stripe avec ta clé secrète
+	// 3. Récupération du prix dynamique
+	concertPrice, err := getConcertPrice(requestData.ConcertID)
+	if err != nil || concertPrice <= 0 {
+		http.Error(w, "Impossible de récupérer le prix du concert", http.StatusBadRequest)
+		return
+	}
+
+	// Conversion en centimes pour Stripe (ex: 113.00 => 11300)
+	priceInCents := int64(concertPrice * 100)
+
+	// 4. Configuration de Stripe avec ta clé secrète
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
 
-	// 4. On remplit le "dossier" de paiement (params)
+	// 5. On remplit le "dossier" de paiement (params)
 	params := &stripe.CheckoutSessionParams{
 		PaymentMethodTypes: stripe.StringSlice([]string{
 			"card",
@@ -74,7 +117,7 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
 						Name: stripe.String("Billet de Concert"),
 					},
-					UnitAmount: stripe.Int64(2000), // 20.00€
+					UnitAmount: stripe.Int64(priceInCents), // Utilisation du prix dynamique
 				},
 				Quantity: stripe.Int64(1),
 			},
@@ -88,11 +131,11 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 6. Sauvegarde en base de données
+	// 7. Sauvegarde en base de données
 	order := models.Order{
 		UserID:          userID,
 		ConcertID:       requestData.ConcertID,
-		Amount:          20.00,
+		Amount:          concertPrice, // Prix dynamique
 		Status:          "pending",
 		StripeSessionID: s.ID,
 	}
