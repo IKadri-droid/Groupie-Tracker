@@ -48,6 +48,14 @@ function App() {
     }
   }, [currentColor]);
 
+  const [showGlobe, setShowGlobe] = useState(false);
+
+  useEffect(() => {
+    // Delay globe rendering to keep the header transition smooth
+    const timer = setTimeout(() => setShowGlobe(true), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="relative min-h-screen text-white p-8">
       {/* Background base (slate) */}
@@ -86,7 +94,7 @@ function App() {
         </div>
         {/* En-tête */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent w-fit mx-auto">
             Les Artistes
           </h1>
         </div>
@@ -125,7 +133,7 @@ function App() {
           ))}
         </div>
       )}
-      <GlobeLayout artists={artists} />
+      {showGlobe && <GlobeLayout artists={artists} />}
       <ArtistDialog
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
