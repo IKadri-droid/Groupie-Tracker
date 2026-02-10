@@ -21,7 +21,7 @@ func InitDB() error {
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
 		log.Println("⚠️ DATABASE_URL not set, using default")
-		connStr = "postgres://user:password@localhost:5432/groupie?sslmode=disable"
+		connStr = "postgres://user:password@db:5432/groupie?sslmode=disable"
 	}
 
 	DB, err = sql.Open("postgres", connStr)
@@ -38,22 +38,28 @@ func InitDB() error {
 }
 
 func RunMigrations() error {
-	files := []string{
-		"migrations/001_create_users_table.sql",
-		"migrations/002_create_orders_table.sql",
-		"migrations/003_add_concert_details.sql",
-		"migrations/004_create_favorites_table.sql",
+	entries, err := os.ReadDir("migrations")
+	if err != nil {
+		return fmt.Errorf("error reading migrations directory: %w", err)
 	}
 
-	for _, file := range files {
-		content, err := os.ReadFile(file)
+	for _, entry := range entries {
+		name := entry.Name()
+		if entry.IsDir() || len(name) < 4 || name[len(name)-4:] != ".sql" {
+			continue
+		}
+
+		filePath := fmt.Sprintf("migrations/%s", name)
+		content, err := os.ReadFile(filePath)
 		if err != nil {
-			return fmt.Errorf("read error %s: %w", file, err)
+			return fmt.Errorf("read error %s: %w", filePath, err)
 		}
+
 		if _, err = DB.Exec(string(content)); err != nil {
-			return fmt.Errorf("migration error %s: %w", file, err)
+			log.Printf("⚠️ Migration warning/error in %s: %v", filePath, err)
+		} else {
+			fmt.Printf("✅ Migration: %s\n", filePath)
 		}
-		fmt.Printf("✅ Migration: %s\n", file)
 	}
 	return nil
 }
