@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { API_BASE_URL } from '@/shared/config/api'
 
 // Définition du type Artist pour TypeScript
 interface Artist {
@@ -18,7 +19,7 @@ function TanStackQueryDemo() {
   const { data, isLoading } = useQuery<Artist[]>({
     queryKey: ['todos'],
     queryFn: async () => {
-      const response = await fetch('http://localhost:8080/api/artists')
+      const response = await fetch(`${API_BASE_URL}/artists`)
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }

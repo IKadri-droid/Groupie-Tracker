@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { CheckCircle2, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/components/ui/card";
+import { API_BASE_URL } from "@/shared/config/api";
 
 export const Route = createFileRoute("/success")({
     validateSearch: (search: Record<string, unknown>) => {
@@ -28,7 +29,7 @@ function SuccessComponent() {
         hasRun.current = true;
         const confirmPayment = async () => {
             try {
-                const response = await fetch("http://localhost:8080/api/confirm-payment", {
+                const response = await fetch(`${API_BASE_URL}/confirm-payment`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

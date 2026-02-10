@@ -20,6 +20,7 @@ export const Route = createFileRoute("/pre-checkout")({
 });
 
 import { useAuthStore } from "../features/auth/store/authStore";
+import { API_BASE_URL } from "@/shared/config/api";
 
 function RouteComponent() {
   const {
@@ -57,7 +58,7 @@ function RouteComponent() {
     if (!token || !user) {
       alert(
         "Veuillez vous connecter pour procéder au paiement. Token: " +
-          (token ? "présent" : "absent"),
+        (token ? "présent" : "absent"),
       );
       return;
     }
@@ -71,7 +72,7 @@ function RouteComponent() {
     // On envoie juste concert_id pour l'instant comme demandé
     try {
       const response = await fetch(
-        "http://localhost:8080/api/create-checkout-session",
+        `${API_BASE_URL}/create-checkout-session`,
         {
           method: "POST",
           headers: {
@@ -80,6 +81,8 @@ function RouteComponent() {
           },
           body: JSON.stringify({
             concert_id: concertId,
+            quantity: standardQty,
+            vip_quantity: vipQty,
           }),
         },
       );
