@@ -3,9 +3,7 @@
 
 import type { Artist } from '../types/artist.types'
 import { useAuthStore } from '../../auth'
-
-// URL de base de l'API backend (Go sur le port 8080)
-const API_BASE_URL = 'http://localhost:8080/api'
+import { API_BASE_URL } from '@/shared/config/api'
 
 /**
  * Récupère la liste de tous les artistes depuis l'API
@@ -42,7 +40,7 @@ export async function getArtistById(id: number): Promise<Artist> {
  * @param artist - Les données de l'artiste à créer (sans l'id)
  * @returns Promise<Artist> - L'artiste créé avec son id
  */
-export async function createArtist(artist: Omit<Artist, 'id'>): Promise<Artist> {   
+export async function createArtist(artist: Omit<Artist, 'id'>): Promise<Artist> {
     const token = useAuthStore.getState().token
     /*Omit<Artist, 'id'> c'est Le type Artist mais sans le champ id (car il sera généré par le backend)*/
     const response = await fetch(`${API_BASE_URL}/artists`, {
@@ -60,7 +58,7 @@ export async function createArtist(artist: Omit<Artist, 'id'>): Promise<Artist> 
 }
 
 
-export async function deleteArtist(id:number){
+export async function deleteArtist(id: number) {
     const token = useAuthStore.getState().token
     const response = await fetch(`${API_BASE_URL}/artists/${id}`, {
         method: 'DELETE',
@@ -72,7 +70,7 @@ export async function deleteArtist(id:number){
     return response.json()
 }
 
-export async function updateArtist(id:number, artist:Artist){
+export async function updateArtist(id: number, artist: Artist) {
     const token = useAuthStore.getState().token
     /*Omit<Artist, 'id'> c'est Le type Artist mais sans le champ id (car il sera généré par le backend)*/
     const response = await fetch(`${API_BASE_URL}/artists/${id}`, {
