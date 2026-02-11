@@ -124,7 +124,12 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
 	}
 
-	s, _ := session.New(params)
+	s, err := session.New(params)
+	if err != nil {
+		log.Printf("❌ Erreur Stripe session.New: %v\n", err)
+		http.Error(w, "Erreur lors de la création de la session de paiement", http.StatusInternalServerError)
+		return
+	}
 
 	// 3. Calcul du montant total réel et sauvegarde
 	totalAmount := (concertPrice * float64(req.Quantity)) + (concertPrice * 2.5 * float64(req.VipQuantity))
@@ -136,8 +141,14 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		Status:          "pending",
 		StripeSessionID: s.ID,
 	}
-	CreateOrder(order)
 
+	if err := CreateOrder(order); err != nil {
+		log.Printf("❌ ERREUR CRITIQUE: Impossible de créer la commande en DB: %v\n", err)
+		http.Error(w, "Erreur interne : Impossible d'enregistrer la commande", http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("✅ Session de paiement créée : %s pour UserID: %d\n", s.ID, userID)
 	json.NewEncoder(w).Encode(map[string]string{"url": s.URL})
 }
 
@@ -145,10 +156,19 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		SessionID string `json:"session_id"`
 	}
-	json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "JSON invalide", http.StatusBadRequest)
+		return
+	}
+
+	sessionID := strings.TrimSpace(req.SessionID)
+	if sessionID == "" {
+		http.Error(w, "Session ID manquant", http.StatusBadRequest)
+		return
+	}
 
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
-	s, err := session.Get(req.SessionID, nil)
+	s, err := session.Get(sessionID, nil)
 	if err != nil {
 		log.Printf("❌ Erreur Stripe session.Get: %v\n", err)
 		http.Error(w, "Erreur Stripe", http.StatusInternalServerError)

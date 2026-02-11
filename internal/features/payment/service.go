@@ -11,6 +11,9 @@ import (
 func SendTicketEmail(toEmail, username, artist, location, date, venue string, amount float64, sessionID string) error {
 	from := os.Getenv("EMAIL_SENDER")
 	password := os.Getenv("EMAIL_PASSWORD")
+	if from == "" || password == "" {
+		return fmt.Errorf("configuration email manquante (EMAIL_SENDER/EMAIL_PASSWORD non définis)")
+	}
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"
 
