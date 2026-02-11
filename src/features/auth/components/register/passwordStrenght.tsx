@@ -43,7 +43,7 @@ export function PasswordStrength({ strength, value }: PasswordStrengthProps) {
                 "Ça tremble un peu",
                 "Ça devient sérieux",
                 "Coffre-fort de Batman",
-                "Le PC de Guilian",
+                "Trump dans les dossier de Epstein",
               ][strength]
             }
           </p>
