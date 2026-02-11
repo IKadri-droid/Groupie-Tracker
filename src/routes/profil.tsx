@@ -32,17 +32,17 @@ const MOCK_STATS = [
 ];
 
 const RECENT_ACTIVITY = [
-  { id: 1, type: "like", content: "a aimé Queen", time: "Hier" },
+  { id: 1, type: "like", content: "avez aimé Queen", time: "Hier" },
   {
     id: 2,
     type: "concert",
-    content: "a participé au concert de Coldplay",
+    content: "avez participé au concert de Coldplay",
     time: "Il y a 2 jours",
   },
   {
     id: 3,
     type: "comment",
-    content: "a commenté sur AC/DC",
+    content: "avez commenté sur AC/DC",
     time: "Il y a 5 jours",
   },
 ];
