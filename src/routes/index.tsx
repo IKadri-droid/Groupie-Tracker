@@ -152,7 +152,7 @@ function App() {
         </h1>
 
         <div
-          className="absolute right-0 flex items-center h-10"
+          className="absolute right-0 flex items-center h-10 pr-8"
           ref={searchRef}
         >
           <motion.div
