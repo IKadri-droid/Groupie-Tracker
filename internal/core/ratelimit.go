@@ -47,8 +47,7 @@ func RateLimitMiddleware(next http.Handler) http.Handler {
 
 		// Support des Proxy (Azure / Vercel / Cloudflare)
 		if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-			// On prend la première IP si plusieurs sont présentes
-			ip = (forwarded)
+			ip = forwarded
 		}
 
 		mu.Lock()
