@@ -79,7 +79,7 @@ export function RouteComponent() {
       {/* Main Content Tabs */}
       <div className="max-w-6xl mx-auto">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="bg-slate-800/50 border border-white/10 p-1 rounded-xl mb-8 flex flex-nowrap overflow-x-auto justify-start md:justify-center gap-2 no-scrollbar">
+          <TabsList className="bg-slate-800/50 border border-white/10 p-1 rounded-xl mb-8 flex flex-nowrap overflow-x-auto overflow-y-hidden justify-start md:justify-center gap-2 no-scrollbar h-auto">
             <TabsTrigger
               value="overview"
               className="shrink-0 data-[state=active]:bg-pink-500 data-[state=active]:text-white rounded-lg px-4 py-2 md:px-6 text-sm md:text-base"
