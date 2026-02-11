@@ -1,0 +1,479 @@
+{
+  "info": {
+    "_postman_id": "c505b8db-6a2a-4c1f-a074-aa448dfa7fc4",
+    "name": "GroupieTracker API",
+    "description": "Collection complète de l'API GroupieTracker - Gestion d'artistes, authentification, profil utilisateur et paiements",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50738642"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "POST Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"AdminGroupie@groupie.com\",\n    \"password\": \"AdminPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "description": "**Endpoint** : `/api/login`\n\n**Description** :\n- Authentifie un utilisateur avec email et mot de passe\n- Valide les données du body (email et password requis)\n- Vérifie que l'utilisateur existe dans la base de données\n- Compare le mot de passe hashé avec celui fourni\n- Génère un token JWT valide pour 24 heures\n- Retourne le token, un message de bienvenue et les informations utilisateur (email, role)\n\n**Headers** :\n- `Content-Type`: application/json\n\n**Body Parameters** :\n- `email` : (requis) Email de l'utilisateur\n- `password` : (requis) Mot de passe de l'utilisateur\n\n**Réponse Success (200)** :\n```json\n{\n    \"message\": \"Bienvenue !\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"user\": {\n        \"email\": \"user@example.com\",\n        \"role\": \"user\"\n    }\n}\n```\n\n**Erreurs possibles** :\n- `400 Bad Request` : Données invalides\n- `401 Unauthorized` : Identifiants incorrects"
+          },
+          "response": []
+        },
+        {
+          "name": "POST Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"newuser@example.com\",\n    \"username\": \"NewUser\",\n    \"password\": \"SecurePassword123\",\n    \"captcha_token\": \"recaptcha_token_here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            },
+            "description": "**Endpoint** : `/api/register`\n\n**Description** :\n- Crée un nouveau compte utilisateur\n- Valide les données du body (email, username, password, captcha_token requis)\n- Vérifie le token reCAPTCHA pour prévenir les bots\n- Hash le mot de passe avec bcrypt avant stockage\n- Crée l'utilisateur dans la base de données avec le rôle \"user\" par défaut\n- Retourne un message de confirmation\n\n**Headers** :\n- `Content-Type`: application/json\n\n**Body Parameters** :\n- `email` : (requis) Email de l'utilisateur\n- `username` : (requis) Nom d'utilisateur\n- `password` : (requis) Mot de passe (sera hashé)\n- `captcha_token` : (requis) Token reCAPTCHA pour validation\n\n**Réponse Success (201)** :\n```json\n{\n    \"message\": \"Utilisateur créé !\"\n}\n```\n\n**Erreurs possibles** :\n- `400 Bad Request` : Données invalides ou captcha échoué\n- `500 Internal Server Error` : Erreur lors de la création (email déjà utilisé, etc.)"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Google Login",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/google/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "google",
+                "login"
+              ]
+            },
+            "description": "**Endpoint** : `/api/auth/google/login`\n\n**Description** :\n- Initie le processus d'authentification OAuth2 avec Google\n- Génère l'URL d'autorisation Google avec les scopes nécessaires\n- Redirige l'utilisateur vers la page de connexion Google\n- Demande l'accès au profil et email de l'utilisateur\n\n**Headers** :\n- Aucun\n\n**Query Parameters** :\n- Aucun\n\n**Réponse** :\n- Redirection (302) vers la page d'authentification Google"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Google Callback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/google/callback?code=authorization_code&state=state_token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "google",
+                "callback"
+              ],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "authorization_code",
+                  "description": "Code d'autorisation Google"
+                },
+                {
+                  "key": "state",
+                  "value": "state_token",
+                  "description": "Token de sécurité"
+                }
+              ]
+            },
+            "description": "**Endpoint** : `/api/auth/google/callback`\n\n**Description** :\n- Reçoit le callback de Google après authentification\n- Échange le code d'autorisation contre un token d'accès\n- Récupère les informations du profil Google (email, nom, ID Google)\n- Crée un nouvel utilisateur si l'email n'existe pas, ou met à jour le google_id si l'utilisateur existe\n- Génère un token JWT pour l'utilisateur\n- Redirige vers le frontend avec le token\n\n**Headers** :\n- Aucun\n\n**Query Parameters** :\n- `code` : (requis) Code d'autorisation fourni par Google\n- `state` : (requis) Token de sécurité pour prévenir les attaques CSRF\n\n**Réponse** :\n- Redirection vers le frontend avec le token JWT en paramètre"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints d'authentification : login classique, inscription et OAuth Google"
+    },
+    {
+      "name": "Artists",
+      "item": [
+        {
+          "name": "GET All Artists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/artists",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "artists"
+              ]
+            },
+            "description": "**Endpoint** : `/api/artists`\n\n**Description** :\n- Récupère la liste complète de tous les artistes\n- Retourne les informations de base de chaque artiste (id, nom, genre, année, image, couleur)\n- Inclut les concerts associés à chaque artiste\n- Trie les artistes par ID croissant\n- Aucune authentification requise (endpoint public)\n\n**Headers** :\n- Aucun\n\n**Query Parameters** :\n- Aucun\n\n**Réponse Success (200)** :\n```json\n[\n    {\n        \"id\": 1,\n        \"name\": \"Queen\",\n        \"genre\": \"Rock\",\n        \"year\": 1995,\n        \"image_url\": \"https://example.com/queen.jpg\",\n        \"color\": \"#FF5733\",\n        \"concerts\": [\n            {\n                \"id\": 1,\n                \"artist_id\": 1,\n                \"location\": \"Paris\",\n                \"date\": \"2026-06-15\",\n                \"time\": \"20:00\",\n                \"venue\": \"Stade de France\",\n                \"price\": \"75€\",\n                \"available_seats\": 50000,\n                \"ticket_url\": \"https://tickets.example.com\"\n            }\n        ]\n    }\n]\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Artist By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/artists/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "artists",
+                "1"
+              ]
+            },
+            "description": "**Endpoint** : `/api/artists/{id}`\n\n**Description** :\n- Récupère les détails d'un artiste spécifique par son ID\n- Retourne toutes les informations de l'artiste (id, nom, genre, année, image, couleur)\n- Inclut la liste complète des concerts de l'artiste\n- Aucune authentification requise (endpoint public)\n\n**Headers** :\n- Aucun\n\n**Path Parameters** :\n- `id` : (requis) ID de l'artiste à récupérer\n\n**Réponse Success (200)** :\n```json\n{\n    \"id\": 1,\n    \"name\": \"Queen\",\n    \"genre\": \"Rock\",\n    \"year\": 1995,\n    \"image_url\": \"https://example.com/queen.jpg\",\n    \"color\": \"#FF5733\",\n    \"concerts\": [\n        {\n            \"id\": 1,\n            \"artist_id\": 1,\n            \"location\": \"Paris\",\n            \"date\": \"2026-06-15\",\n            \"time\": \"20:00\",\n            \"venue\": \"Stade de France\",\n            \"price\": \"75€\",\n            \"available_seats\": 50000,\n            \"ticket_url\": \"https://tickets.example.com\"\n        }\n    ]\n}\n```\n\n**Erreurs possibles** :\n- `404 Not Found` : Artiste non trouvé"
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Artist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"The Beatles\",\n    \"genre\": \"Rock\",\n    \"year\": 1970,\n    \"image_url\": \"https://example.com/beatles.jpg\",\n    \"color\": \"#3498db\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/artists",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "artists"
+              ]
+            },
+            "description": "**Endpoint** : `/api/artists`\n\n**Description** :\n- Vérifie que l'utilisateur est authentifié et possède le rôle \"admin\"\n- Valide les données du body\n- Crée un nouvel artiste dans la base de données\n- Retourne l'artiste créé avec son ID généré\n- Nécessite un token JWT valide avec rôle admin\n\n**Headers** :\n- `Authorization`: Bearer {token}\n- `Content-Type`: application/json\n\n**Body Parameters** :\n- `name` : (requis) Nom de l'artiste\n- `genre` : (requis) Genre musical\n- `year` : (requis) Année du dernier album\n- `image_url` : (optionnel) URL de l'image de l'artiste\n- `color` : (optionnel) Couleur thématique (format hexadécimal)\n\n**Réponse Success (201)** :\n```json\n{\n    \"id\": 5,\n    \"name\": \"The Beatles\",\n    \"genre\": \"Rock\",\n    \"year\": 1970,\n    \"image_url\": \"https://example.com/beatles.jpg\",\n    \"color\": \"#3498db\"\n}\n```\n\n**Erreurs possibles** :\n- `403 Forbidden` : Utilisateur non admin ou non authentifié\n- `405 Method Not Allowed` : Méthode HTTP incorrecte"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de gestion des artistes : consultation publique et création admin"
+    },
+    {
+      "name": "Deezer Integration",
+      "item": [
+        {
+          "name": "GET Search Artist on Deezer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/deezer/search?name=Queen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "deezer",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Queen",
+                  "description": "Nom de l'artiste à rechercher"
+                }
+              ]
+            },
+            "description": "**Endpoint** : `/api/deezer/search`\n\n**Description** :\n- Recherche un artiste sur l'API Deezer par son nom\n- Retourne les informations de base de l'artiste depuis Deezer\n- Inclut l'ID Deezer nécessaire pour récupérer albums et tracks\n- Accepte les paramètres 'name' ou 'q' (alias)\n- Aucune authentification requise\n\n**Headers** :\n- Aucun\n\n**Query Parameters** :\n- `name` ou `q` : (requis) Nom de l'artiste à rechercher sur Deezer\n\n**Réponse Success (200)** :\n```json\n{\n    \"id\": 412,\n    \"name\": \"Queen\",\n    \"picture\": \"https://api.deezer.com/artist/412/image\",\n    \"nb_album\": 50,\n    \"nb_fan\": 5000000\n}\n```\n\n**Erreurs possibles** :\n- `400 Bad Request` : Paramètre 'name' manquant\n- `404 Not Found` : Artiste non trouvé sur Deezer"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Artist Albums from Deezer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/deezer/albums?artist_id=412",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "deezer",
+                "albums"
+              ],
+              "query": [
+                {
+                  "key": "artist_id",
+                  "value": "412",
+                  "description": "ID Deezer de l'artiste"
+                }
+              ]
+            },
+            "description": "**Endpoint** : `/api/deezer/albums`\n\n**Description** :\n- Récupère la liste des albums d'un artiste depuis l'API Deezer\n- Nécessite l'ID Deezer de l'artiste (obtenu via /deezer/search)\n- Retourne les détails de chaque album (titre, cover, date de sortie, etc.)\n- Accepte les paramètres 'artist_id' ou 'artistID' (camelCase pour frontend)\n- Aucune authentification requise\n\n**Headers** :\n- Aucun\n\n**Query Parameters** :\n- `artist_id` ou `artistID` : (requis) ID Deezer de l'artiste\n\n**Réponse Success (200)** :\n```json\n{\n    \"data\": [\n        {\n            \"id\": 12345,\n            \"title\": \"A Night at the Opera\",\n            \"cover\": \"https://api.deezer.com/album/12345/image\",\n            \"release_date\": \"1975-11-21\",\n            \"nb_tracks\": 12\n        }\n    ]\n}\n```\n\n**Erreurs possibles** :\n- `400 Bad Request` : ID artiste invalide ou manquant\n- `500 Internal Server Error` : Erreur API Deezer"
+          },
+          "response": []
+        },
+        {
+          "name": "GET Artist Top Tracks from Deezer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/deezer/top-tracks?artist_id=412",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "deezer",
+                "top-tracks"
+              ],
+              "query": [
+                {
+                  "key": "artist_id",
+                  "value": "412",
+                  "description": "ID Deezer de l'artiste"
+                }
+              ]
+            },
+            "description": "**Endpoint** : `/api/deezer/top-tracks`\n\n**Description** :\n- Récupère les titres les plus populaires d'un artiste depuis l'API Deezer\n- Nécessite l'ID Deezer de l'artiste (obtenu via /deezer/search)\n- Retourne les détails de chaque track (titre, durée, preview, etc.)\n- Accepte les paramètres 'artist_id' ou 'artistID' (camelCase pour frontend)\n- Aucune authentification requise\n\n**Headers** :\n- Aucun\n\n**Query Parameters** :\n- `artist_id` ou `artistID` : (requis) ID Deezer de l'artiste\n\n**Réponse Success (200)** :\n```json\n{\n    \"data\": [\n        {\n            \"id\": 67890,\n            \"title\": \"Bohemian Rhapsody\",\n            \"duration\": 354,\n            \"preview\": \"https://cdns-preview-e.dzcdn.net/stream/...\",\n            \"rank\": 950000\n        }\n    ]\n}\n```\n\n**Erreurs possibles** :\n- `400 Bad Request` : ID artiste invalide ou manquant\n- `500 Internal Server Error` : Erreur API Deezer"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints d'intégration avec l'API Deezer pour récupérer albums et morceaux"
+    },
+    {
+      "name": "User Profile",
+      "item": [
+        {
+          "name": "GET User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            },
+            "description": "**Endpoint** : `/api/profile`\n\n**Description** :\n- Récupère le profil de l'utilisateur authentifié\n- Valide le token JWT dans le header Authorization\n- Extrait l'ID utilisateur depuis le token\n- Retourne les informations du profil (username, email, role, nombre de commandes)\n- Compte automatiquement le nombre de commandes payées de l'utilisateur\n\n**Headers** :\n- `Authorization`: Bearer {token}\n\n**Query Parameters** :\n- Aucun\n\n**Réponse Success (200)** :\n```json\n{\n    \"username\": \"JohnDoe\",\n    \"email\": \"john@example.com\",\n    \"role\": \"user\",\n    \"order_count\": 5\n}\n```\n\n**Erreurs possibles** :\n- `401 Unauthorized` : Token invalide ou manquant\n- `404 Not Found` : Utilisateur non trouvé"
+          },
+          "response": []
+        },
+        {
+          "name": "GET User History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/history",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "history"
+              ]
+            },
+            "description": "**Endpoint** : `/api/history`\n\n**Description** :\n- Récupère l'historique des commandes de l'utilisateur authentifié\n- Valide le token JWT dans le header Authorization\n- Extrait l'ID utilisateur depuis le token\n- Retourne la liste complète des commandes (payées et en attente)\n- Inclut les détails de chaque commande (montant, statut, date, etc.)\n\n**Headers** :\n- `Authorization`: Bearer {token}\n\n**Query Parameters** :\n- Aucun\n\n**Réponse Success (200)** :\n```json\n[\n    {\n        \"id\": 1,\n        \"user_id\": 3,\n        \"amount\": 75.00,\n        \"status\": \"paid\",\n        \"created_at\": \"2026-02-10T14:30:00Z\",\n        \"stripe_session_id\": \"cs_test_...\"\n    }\n]\n```\n\n**Erreurs possibles** :\n- `401 Unauthorized` : Token invalide ou manquant"
+          },
+          "response": []
+        },
+        {
+          "name": "GET User Favorites",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/favorites",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "favorites"
+              ]
+            },
+            "description": "**Endpoint** : `/api/favorites`\n\n**Description** :\n- Récupère la liste des artistes favoris de l'utilisateur authentifié\n- Valide le token JWT dans le header Authorization\n- Extrait l'ID utilisateur depuis le token\n- Retourne la liste des artistes marqués comme favoris\n- Inclut les détails complets de chaque artiste favori\n\n**Headers** :\n- `Authorization`: Bearer {token}\n\n**Query Parameters** :\n- Aucun\n\n**Réponse Success (200)** :\n```json\n[\n    {\n        \"id\": 1,\n        \"name\": \"Queen\",\n        \"genre\": \"Rock\",\n        \"year\": 1995,\n        \"image_url\": \"https://example.com/queen.jpg\",\n        \"color\": \"#FF5733\"\n    }\n]\n```\n\n**Erreurs possibles** :\n- `401 Unauthorized` : Token invalide ou manquant"
+          },
+          "response": []
+        },
+        {
+          "name": "POST Add Favorite",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"artist_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/favorites",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "favorites"
+              ]
+            },
+            "description": "**Endpoint** : `/api/favorites`\n\n**Description** :\n- Ajoute un artiste aux favoris de l'utilisateur authentifié\n- Valide le token JWT dans le header Authorization\n- Extrait l'ID utilisateur depuis le token\n- Valide les données du body (artist_id requis)\n- Crée une entrée dans la table favorites\n- Évite les doublons (gestion en base de données)\n\n**Headers** :\n- `Authorization`: Bearer {token}\n- `Content-Type`: application/json\n\n**Body Parameters** :\n- `artist_id` : (requis) ID de l'artiste à ajouter aux favoris\n\n**Réponse Success (201)** :\n- Status code 201 Created (pas de body)\n\n**Erreurs possibles** :\n- `401 Unauthorized` : Token invalide ou manquant\n- `400 Bad Request` : artist_id manquant ou invalide"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de gestion du profil utilisateur et des favoris"
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "POST Create Checkout Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"concert_id\": 1,\n    \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/create-checkout-session",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "create-checkout-session"
+              ]
+            },
+            "description": "**Endpoint** : `/api/create-checkout-session`\n\n**Description** :\n- Crée une session de paiement Stripe pour l'achat de billets de concert\n- Valide le token JWT dans le header Authorization\n- Extrait l'ID utilisateur depuis le token\n- Valide les données du body (concert_id et quantity requis)\n- Récupère les informations du concert depuis la base de données\n- Crée une commande en statut \"pending\" dans la base de données\n- Génère une session Stripe Checkout avec les détails du concert\n- Retourne l'URL de paiement Stripe\n\n**Headers** :\n- `Authorization`: Bearer {token}\n- `Content-Type`: application/json\n\n**Body Parameters** :\n- `concert_id` : (requis) ID du concert pour lequel acheter des billets\n- `quantity` : (requis) Nombre de billets à acheter\n\n**Réponse Success (200)** :\n```json\n{\n    \"url\": \"https://checkout.stripe.com/pay/cs_test_...\",\n    \"session_id\": \"cs_test_a1b2c3d4e5f6g7h8i9j0\"\n}\n```\n\n**Erreurs possibles** :\n- `401 Unauthorized` : Token invalide ou manquant\n- `400 Bad Request` : Données invalides\n- `404 Not Found` : Concert non trouvé\n- `500 Internal Server Error` : Erreur Stripe"
+          },
+          "response": []
+        },
+        {
+          "name": "POST Confirm Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"session_id\": \"cs_test_a1b2c3d4e5f6g7h8i9j0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/confirm-payment",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "confirm-payment"
+              ]
+            },
+            "description": "**Endpoint** : `/api/confirm-payment`\n\n**Description** :\n- Confirme le paiement après redirection depuis Stripe\n- Valide les données du body (session_id requis)\n- Récupère la session Stripe pour vérifier le statut du paiement\n- Met à jour le statut de la commande en \"paid\" si le paiement est réussi\n- Envoie un email de confirmation à l'utilisateur\n- Retourne un message de confirmation\n- Aucune authentification requise (appelé après redirection Stripe)\n\n**Headers** :\n- `Content-Type`: application/json\n\n**Body Parameters** :\n- `session_id` : (requis) ID de session Stripe à confirmer\n\n**Réponse Success (200)** :\n```json\n{\n    \"message\": \"Paiement confirmé\",\n    \"status\": \"paid\"\n}\n```\n\n**Erreurs possibles** :\n- `400 Bad Request` : session_id manquant\n- `404 Not Found` : Commande non trouvée\n- `500 Internal Server Error` : Erreur lors de la confirmation"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de gestion des paiements via Stripe"
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
