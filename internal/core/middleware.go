@@ -11,6 +11,9 @@ func EnableCORS(w http.ResponseWriter, r *http.Request) {
 	allowedOrigins := []string{
 		"http://localhost:3000",
 		"https://groupie-tracker-ynov.vercel.app",
+		"capacitor://localhost",
+		"http://localhost",
+		"ionic://localhost",
 	}
 
 	origin := r.Header.Get("Origin")

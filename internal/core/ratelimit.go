@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -47,7 +48,9 @@ func RateLimitMiddleware(next http.Handler) http.Handler {
 
 		// Support des Proxy (Azure / Vercel / Cloudflare)
 		if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-			ip = forwarded
+			// On prend la première IP si plusieurs sont présentes (format: client, proxy1, proxy2)
+			parts := strings.Split(forwarded, ",")
+			ip = strings.TrimSpace(parts[0])
 		}
 
 		mu.Lock()
@@ -74,15 +77,15 @@ func RateLimitMiddleware(next http.Handler) http.Handler {
 			c.windowStart = time.Now()
 		}
 
-		// 3. Incrémenter et vérifier le seuil (5 requêtes max)
+		// 3. Incrémenter et vérifier le seuil (10 requêtes max)
 		c.attempts++
-		if c.attempts > 5 {
-			c.blockedUntil = time.Now().Add(10 * time.Minute)
+		if c.attempts > 10 {
+			c.blockedUntil = time.Now().Add(10 * time.Second)
 			mu.Unlock()
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusTooManyRequests)
-			fmt.Fprintf(w, `{"error": "Sécurité : Limite de 5 requêtes/min dépassée. IP bannie pour 10 minutes."}`)
+			fmt.Fprintf(w, `{"error": "Sécurité : Limite de 10 requêtes/min dépassée. IP bannie temporairement pour 10 secondes."}`)
 			return
 		}
 		mu.Unlock()
