@@ -53,20 +53,39 @@ const Carousel3D = forwardRef<CarouselHandle, Carousel3DProps>(
 
     useImperativeHandle(ref, () => ({
       scrollToArtist: (artistId: number) => {
-        const index = displayArtists.findIndex((a) => a.id === artistId);
-        if (index === -1) return;
+        // Trouver tous les indices possibles pour cet artiste (duplication pour le loop infini)
+        const allIndices: number[] = [];
+        displayArtists.forEach((a, i) => {
+          if (a.id === artistId) allIndices.push(i);
+        });
 
-        // Calcul de la position pour centrer la carte
-        // On veut que : index * ITEM_SIZE + xTranslation = (containerWidth / 2) - (ITEM_SIZE / 2)
-        // Donc : xTranslation = (containerWidth / 2) - (ITEM_SIZE / 2) - (index * ITEM_SIZE)
+        if (allIndices.length === 0) return;
 
         const containerWidth =
           containerRef.current?.offsetWidth || window.innerWidth;
-        const targetX = containerWidth / 2 - ITEM_SIZE / 2 - index * ITEM_SIZE;
+        const centerOffset = containerWidth / 2 - ITEM_SIZE / 2;
+
+        // On cherche l'indice qui demande le moins de déplacement par rapport à la position actuelle
+        let bestIndex = allIndices[0];
+        let minDistance = Math.abs(
+          xRef.current - (centerOffset - allIndices[0] * ITEM_SIZE),
+        );
+
+        for (let i = 1; i < allIndices.length; i++) {
+          const index = allIndices[i];
+          const targetX = centerOffset - index * ITEM_SIZE;
+          const distance = Math.abs(xRef.current - targetX);
+          if (distance < minDistance) {
+            minDistance = distance;
+            bestIndex = index;
+          }
+        }
+
+        const finalTargetX = centerOffset - bestIndex * ITEM_SIZE;
 
         isPausedRef.current = true; // Stop loop
 
-        animate(xTranslation, targetX, {
+        animate(xTranslation, finalTargetX, {
           duration: 1.5,
           ease: "easeInOut",
           onUpdate: (v) => {
