@@ -60,6 +60,11 @@ const registerSchema = z.object({
   username: z.string().min(3, {
     message: "Le nom d'utilisateur doit faire au moins 3 caractères",
   }),
+  acceptTerms: z.literal(true, {
+    errorMap: () => ({
+      message: "Vous devez accepter la politique de confidentialité",
+    }),
+  }),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -86,6 +91,7 @@ export function RegisterForm() {
       email: "",
       password: "",
       username: "",
+      acceptTerms: false as any,
     },
   });
 
@@ -98,9 +104,10 @@ export function RegisterForm() {
     // Générer le token captcha
     const captchaToken = await executeRecaptcha("register");
 
-    // Ajouter le token aux données
+    // Ajouter le token aux données et exclure acceptTerms pour le backend
+    const { acceptTerms, ...credentials } = data;
     mutation.mutate({
-      ...data,
+      ...credentials,
       captchaToken,
     });
   }
@@ -203,6 +210,44 @@ export function RegisterForm() {
                       />
                     </FormControl>
                     <FormMessage className="text-pink-400" />
+                  </FormItem>
+                )}
+              />
+
+              {/* Case à cocher RGPD */}
+              <FormField
+                control={form.control}
+                name="acceptTerms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 rounded-xl border border-white/10 bg-white/5">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 mt-1 rounded border-white/20 bg-white/5 text-pink-500 focus:ring-pink-500 focus:ring-offset-0"
+                        checked={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-medium text-slate-300">
+                        J'accepte la{" "}
+                        <Link
+                          to="/privacy"
+                          className="text-pink-400 hover:text-pink-300 underline underline-offset-4"
+                        >
+                          politique de confidentialité
+                        </Link>{" "}
+                        et les{" "}
+                        <Link
+                          to="/legal"
+                          className="text-pink-400 hover:text-pink-300 underline underline-offset-4"
+                        >
+                          mentions légales
+                        </Link>
+                        .
+                      </FormLabel>
+                      <FormMessage className="text-pink-400" />
+                    </div>
                   </FormItem>
                 )}
               />

@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PreCheckoutRouteImport } from './routes/pre-checkout'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as CancelRouteImport } from './routes/cancel'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -34,6 +36,11 @@ const ProfilRoute = ProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PreCheckoutRoute = PreCheckoutRouteImport.update({
   id: '/pre-checkout',
   path: '/pre-checkout',
@@ -42,6 +49,11 @@ const PreCheckoutRoute = PreCheckoutRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CancelRoute = CancelRouteImport.update({
@@ -68,8 +80,10 @@ const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cancel': typeof CancelRoute
+  '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
   '/pre-checkout': typeof PreCheckoutRoute
+  '/privacy': typeof PrivacyRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
   '/success': typeof SuccessRoute
@@ -79,8 +93,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cancel': typeof CancelRoute
+  '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
   '/pre-checkout': typeof PreCheckoutRoute
+  '/privacy': typeof PrivacyRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
   '/success': typeof SuccessRoute
@@ -91,8 +107,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cancel': typeof CancelRoute
+  '/legal': typeof LegalRoute
   '/login': typeof LoginRoute
   '/pre-checkout': typeof PreCheckoutRoute
+  '/privacy': typeof PrivacyRoute
   '/profil': typeof ProfilRoute
   '/register': typeof RegisterRoute
   '/success': typeof SuccessRoute
@@ -104,8 +122,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/cancel'
+    | '/legal'
     | '/login'
     | '/pre-checkout'
+    | '/privacy'
     | '/profil'
     | '/register'
     | '/success'
@@ -115,8 +135,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/cancel'
+    | '/legal'
     | '/login'
     | '/pre-checkout'
+    | '/privacy'
     | '/profil'
     | '/register'
     | '/success'
@@ -126,8 +148,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/cancel'
+    | '/legal'
     | '/login'
     | '/pre-checkout'
+    | '/privacy'
     | '/profil'
     | '/register'
     | '/success'
@@ -138,8 +162,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CancelRoute: typeof CancelRoute
+  LegalRoute: typeof LegalRoute
   LoginRoute: typeof LoginRoute
   PreCheckoutRoute: typeof PreCheckoutRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfilRoute: typeof ProfilRoute
   RegisterRoute: typeof RegisterRoute
   SuccessRoute: typeof SuccessRoute
@@ -170,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pre-checkout': {
       id: '/pre-checkout'
       path: '/pre-checkout'
@@ -182,6 +215,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cancel': {
@@ -218,8 +258,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CancelRoute: CancelRoute,
+  LegalRoute: LegalRoute,
   LoginRoute: LoginRoute,
   PreCheckoutRoute: PreCheckoutRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfilRoute: ProfilRoute,
   RegisterRoute: RegisterRoute,
   SuccessRoute: SuccessRoute,
