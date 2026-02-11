@@ -58,7 +58,7 @@ function RouteComponent() {
     if (!token || !user) {
       alert(
         "Veuillez vous connecter pour procéder au paiement. Token: " +
-        (token ? "présent" : "absent"),
+          (token ? "présent" : "absent"),
       );
       return;
     }
@@ -71,21 +71,18 @@ function RouteComponent() {
     // NOTE: Le backend actuel ne gère pas encore les quantités/types de billets
     // On envoie juste concert_id pour l'instant comme demandé
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/create-checkout-session`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            concert_id: concertId,
-            quantity: standardQty,
-            vip_quantity: vipQty,
-          }),
+      const response = await fetch(`${API_BASE_URL}/create-checkout-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({
+          concert_id: concertId,
+          quantity: standardQty,
+          vip_quantity: vipQty,
+        }),
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -149,8 +146,8 @@ function RouteComponent() {
               {venue || "TBA"}
             </p>
 
-            {/* Date (En jaune/lime comme sur ta maquette pour le contraste) */}
-            <p className="text-lime-300 font-bold text-lg mb-4">
+            {/* Date (En dégradé comme sur la page index) */}
+            <p className="bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent font-bold text-lg mb-4 w-fit">
               {new Date(date).toLocaleDateString("fr-FR", {
                 weekday: "long",
                 day: "numeric",
@@ -181,7 +178,7 @@ function RouteComponent() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="font-mono text-lime-300 font-bold">
+                  <div className="font-mono bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent font-bold">
                     {PRICE_STANDARD}.00 €
                   </div>
 
@@ -231,7 +228,7 @@ function RouteComponent() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="font-mono text-lime-300 font-bold">
+                  <div className="font-mono bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent font-bold">
                     {PRICE_VIP}.00 €
                   </div>
 
@@ -274,7 +271,7 @@ function RouteComponent() {
               </div>
               <button
                 onClick={handlePayment}
-                className="bg-lime-400 text-black px-8 py-3 rounded-xl font-bold hover:bg-lime-300 transition-colors hover:scale-105 active:scale-95"
+                className="bg-gradient-to-r from-pink-500 to-orange-400 text-white px-8 py-3 rounded-xl font-bold hover:opacity-90 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-pink-500/20"
               >
                 Payer
               </button>
