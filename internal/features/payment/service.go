@@ -3,6 +3,7 @@ package payment
 import (
 	"fmt"
 	"groupie/internal/core"
+	"log"
 	"net/smtp"
 	"os"
 )
@@ -64,6 +65,7 @@ func SendTicketEmail(toEmail, username, artist, location, date, venue string, am
 
 // DB Helpers for Payment
 func CreateOrder(order *Order) error {
+	log.Printf("📝 Création commande en DB - Session Stripe: %s, UserID: %d\n", order.StripeSessionID, order.UserID)
 	query := `INSERT INTO orders (user_id, concert_id, amount, status, stripe_session_id) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at`
 	return core.DB.QueryRow(query, order.UserID, order.ConcertID, order.Amount, order.Status, order.StripeSessionID).Scan(&order.ID, &order.CreatedAt)
 }
