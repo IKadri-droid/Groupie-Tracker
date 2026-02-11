@@ -156,13 +156,8 @@ function App() {
       </div>
 
       {/* En-tête full width pour permettre au bouton d'être à droite */}
-<<<<<<< Updated upstream
-      <div className="relative flex items-center justify-center mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent w-fit">
-=======
       <div className="relative flex items-center justify-center mb-4 md:mb-8 px-4 md:px-0">
         <h1 className="text-4xl md:text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent w-fit">
->>>>>>> Stashed changes
           Les Artistes
         </h1>
 
