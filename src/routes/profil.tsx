@@ -70,7 +70,7 @@ export function RouteComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white pb-20 pt-40 px-4 sm:px-8">
+    <div className="min-h-screen bg-[#0f172a] text-white pb-20 pt-28 md:pt-40 px-4 sm:px-8">
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto mb-10">
         <ProfileHeader user={user} mockStats={MOCK_STATS} />
@@ -79,28 +79,28 @@ export function RouteComponent() {
       {/* Main Content Tabs */}
       <div className="max-w-6xl mx-auto">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="bg-slate-800/50 border border-white/10 p-1 rounded-xl mb-8">
+          <TabsList className="bg-slate-800/50 border border-white/10 p-1 rounded-xl mb-8 flex flex-nowrap overflow-x-auto justify-start md:justify-center gap-2 no-scrollbar">
             <TabsTrigger
               value="overview"
-              className="data-[state=active]:bg-pink-500 data-[state=active]:text-white rounded-lg px-6"
+              className="shrink-0 data-[state=active]:bg-pink-500 data-[state=active]:text-white rounded-lg px-4 py-2 md:px-6 text-sm md:text-base"
             >
               Vue d'ensemble
             </TabsTrigger>
             <TabsTrigger
               value="favorites"
-              className="data-[state=active]:bg-pink-500 data-[state=active]:text-white rounded-lg px-6"
+              className="shrink-0 data-[state=active]:bg-pink-500 data-[state=active]:text-white rounded-lg px-4 py-2 md:px-6 text-sm md:text-base"
             >
               Favoris
             </TabsTrigger>
             <TabsTrigger
               value="purchases"
-              className="data-[state=active]:bg-pink-500 data-[state=active]:text-white rounded-lg px-6"
+              className="shrink-0 data-[state=active]:bg-pink-500 data-[state=active]:text-white rounded-lg px-4 py-2 md:px-6 text-sm md:text-base"
             >
               Achats
             </TabsTrigger>
             <TabsTrigger
               value="settings"
-              className="data-[state=active]:bg-pink-500 data-[state=active]:text-white rounded-lg px-6"
+              className="shrink-0 data-[state=active]:bg-pink-500 data-[state=active]:text-white rounded-lg px-4 py-2 md:px-6 text-sm md:text-base"
             >
               Paramètres
             </TabsTrigger>
