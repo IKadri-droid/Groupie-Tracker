@@ -45,8 +45,9 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		"message": "Bienvenue !",
 		"token":   token,
 		"user": map[string]string{
-			"email": foundUser.Email,
-			"role":  foundUser.Role,
+			"email":    foundUser.Email,
+			"role":     foundUser.Role,
+			"username": foundUser.Username,
 		},
 	})
 }
