@@ -14,54 +14,23 @@ import { Button } from "@/shared/components/ui/button";
 import { Slider } from "@/shared/components/ui/slider";
 import { Play, Pause } from "lucide-react";
 import { useRef, useState } from "react";
-import { useAuthStore } from "@/features/auth";
-import { createCheckoutSession } from "@/features/payment/api/paymentApi";
-import { toast } from "sonner";
 
 interface Props {
   isDialogOpen: boolean;
   setIsDialogOpen: (value: boolean) => void;
   selectedArtist: Artist | null;
+  onShowOnGlobe?: (artistName: string) => void;
 }
 
 export default function ArtistDialog({
   isDialogOpen,
   setIsDialogOpen,
   selectedArtist,
+  onShowOnGlobe,
 }: Props) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [volume, setVolume] = useState([1]); // Tableau car le Slider Shadcn attend un tableau (0 à 1)
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { token, user } = useAuthStore();
-
-  const handleBuyTicket = async () => {
-    if (!user || !token) {
-      toast.error("Vous devez être connecté pour acheter un billet");
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      // 1. On cherche le premier concert disponible de l'artiste
-      const concertId = selectedArtist?.concerts?.[0]?.id;
-
-      if (!concertId) {
-        toast.error("Aucun concert disponible pour cet artiste pour le moment.");
-        setIsProcessing(false);
-        return;
-      }
-
-      // 2. On utilise le VRAI id du concert et non l'id de l'artiste
-      const { url } = await createCheckoutSession(concertId, token);
-      window.location.href = url; // Redirection vers Stripe
-    } catch (error) {
-      console.error("Payment error:", error);
-      toast.error("Erreur lors de l'initialisation du paiement");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -168,18 +137,32 @@ export default function ArtistDialog({
           </div>
           {/* prochain concert */}
           <div className="p-4 flex flex-col items-center">
-            <h1 className="mb-2">Prochain concert</h1>
+            <h1 className="mb-2">Prochains concerts</h1>
             <div className="flex-1 flex flex-col items-center justify-center gap-4">
-              <div className="font-extralight text-lg text-slate-300">
-                {"Paris - 25 Mai 2026"}
-              </div>
-              <Button
-                onClick={handleBuyTicket}
-                disabled={isProcessing}
-                className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
-              >
-                {isProcessing ? "Redirection..." : "Réserver - 20€"}
-              </Button>
+              {selectedArtist?.concerts &&
+              selectedArtist.concerts.length > 0 ? (
+                <>
+                  <Button
+                    onClick={() =>
+                      selectedArtist && onShowOnGlobe?.(selectedArtist.name)
+                    }
+                    className="group relative overflow-hidden bg-white/10 hover:bg-white/20 text-white border border-white/20 px-8 py-6 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span className="relative z-10 flex items-center gap-2">
+                      Voir les dates
+                    </span>
+                    <div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500/50 to-transparent" />
+                  </Button>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-4 opacity-50">📅</div>
+                  <p className="text-lg font-medium text-white/60">
+                    Aucun concert prévu
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

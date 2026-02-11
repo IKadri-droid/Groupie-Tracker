@@ -23,6 +23,8 @@ function App() {
   const lastColorRef = useRef<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [globeSearchQuery, setGlobeSearchQuery] = useState("");
+  const globeContainerRef = useRef<HTMLDivElement>(null);
 
   const carouselRef = useRef<CarouselHandle>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,6 +100,14 @@ function App() {
     const timer = setTimeout(() => setShowGlobe(true), 600);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleShowOnGlobe = (artistName: string) => {
+    setIsDialogOpen(false);
+    setGlobeSearchQuery(artistName);
+    setTimeout(() => {
+      globeContainerRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
 
   return (
     <div className="relative min-h-screen text-white">
@@ -253,11 +263,16 @@ function App() {
           />
         </div>
       )}
-      {showGlobe && <GlobeLayout artists={artists} />}
+      <div ref={globeContainerRef}>
+        {showGlobe && (
+          <GlobeLayout artists={artists} searchQuery={globeSearchQuery} />
+        )}
+      </div>
       <ArtistDialog
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
         selectedArtist={selectedArtist}
+        onShowOnGlobe={handleShowOnGlobe}
       />
     </div>
   );

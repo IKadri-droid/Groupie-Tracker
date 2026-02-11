@@ -5,19 +5,19 @@ import SidebarControls from "./sideBar/SidebarControls";
 import ConcertCard from "./sideBar/ConcertCard";
 
 interface GlobeSidebarProps {
-  artist: Artist | null;
   artists: Artist[];
   onConcertClick?: (lat: number, lng: number) => void;
   expandedConcertId: number | null;
   setExpandedConcertId: (id: number | null) => void;
+  externalSearchQuery?: string;
 }
 
 export default function GlobeSidebar({
-  artist,
   artists,
   onConcertClick,
   expandedConcertId,
   setExpandedConcertId,
+  externalSearchQuery,
 }: GlobeSidebarProps) {
   const allConcerts = artists.flatMap((artist) => {
     if (!artist.concerts) return [];
@@ -37,6 +37,13 @@ export default function GlobeSidebar({
   const [searchQuery, setSearchQuery] = useState("");
 
   const shouldScrollRef = useRef(true);
+
+  // Effet pour synchroniser la recherche externe
+  useEffect(() => {
+    if (externalSearchQuery !== undefined) {
+      setSearchQuery(externalSearchQuery);
+    }
+  }, [externalSearchQuery]);
 
   // Effet pour scroller vers la carte ouverte
   useEffect(() => {

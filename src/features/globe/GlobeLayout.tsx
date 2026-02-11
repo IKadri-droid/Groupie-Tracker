@@ -5,15 +5,19 @@ import GlobeSidebar from "./components/GlobeSidebar";
 import type { Artist } from "@/features/artists";
 import { useState, useRef } from "react";
 
-export default function GlobeLayout({ artists }: { artists: Artist[] }) {
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+export default function GlobeLayout({
+  artists,
+  searchQuery,
+}: {
+  artists: Artist[];
+  searchQuery?: string;
+}) {
   const [expandedConcertId, setExpandedConcertId] = useState<number | null>(
     null,
   );
   const globeRef = useRef<ConcertGlobeHandle>(null);
 
-  const handlePointClick = (artist: Artist, concertId: number) => {
-    setSelectedArtist(artist);
+  const handlePointClick = (_artist: Artist, concertId: number) => {
     setExpandedConcertId(concertId); // On ouvre la carte correspondante !
   };
 
@@ -34,11 +38,11 @@ export default function GlobeLayout({ artists }: { artists: Artist[] }) {
       {/* Menu Latéral en Absolute */}
       <div className="absolute top-4 left-4 z-20 h-[calc(100%-2rem)] flex items-center">
         <GlobeSidebar
-          artist={selectedArtist}
           artists={artists}
           onConcertClick={handleConcertClick}
           expandedConcertId={expandedConcertId}
           setExpandedConcertId={setExpandedConcertId}
+          externalSearchQuery={searchQuery}
         />
       </div>
       {/* Le Globe prend toute la place */}
