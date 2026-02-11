@@ -23,8 +23,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate, Link } from "@tanstack/react-router";
 import { loginUser, useAuthStore } from "@/features/auth";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { GoogleLoginButton } from "./googleLoginButton";
+import { getProfile } from "@/features/auth";
+
 // Schéma de validation Zod
 const loginSchema = z.object({
   email: z.string().email({ message: "Email invalide" }),
@@ -36,6 +39,30 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate(); // 2. Initialise le hook navigate
   const setLogin = useAuthStore((state) => state.setLogin);
+
+  // Gestion du token Google dans l'URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (token) {
+      const fetchProfile = async () => {
+        try {
+          const user = await getProfile(token);
+          setLogin(user, token);
+          toast.success(
+            `Connexion réussie ! Bienvenue ${user.username || user.email}`,
+          );
+          navigate({ to: "/" });
+        } catch (error: any) {
+          toast.error("Erreur lors de la connexion avec Google");
+          console.error(error);
+        }
+      };
+      fetchProfile();
+    }
+  }, [navigate, setLogin]);
+
   // La mutation TanStack Query
   const mutation = useMutation({
     mutationFn: loginUser,
@@ -141,6 +168,16 @@ export function LoginForm() {
               >
                 {mutation.isPending ? "Connexion..." : "Se connecter"}
               </Button>
+
+              <div className="relative flex items-center gap-4 py-2">
+                <div className="flex-grow h-px bg-white/10"></div>
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  OU
+                </span>
+                <div className="flex-grow h-px bg-white/10"></div>
+              </div>
+
+              <GoogleLoginButton />
             </form>
           </Form>
         </CardContent>

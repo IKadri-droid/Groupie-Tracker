@@ -27,6 +27,7 @@ import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { PasswordStrength } from "./passwordStrenght";
+import { GoogleLoginButton } from "../googleLoginButton";
 
 function getPasswordStrength(password: string): number {
   var score = 0;
@@ -229,7 +230,7 @@ export function RegisterForm() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="text-sm font-medium text-slate-300">
+                      <FormLabel className="text-sm font-medium text-slate-300 block leading-normal">
                         J'accepte la{" "}
                         <Link
                           to="/privacy"
@@ -259,6 +260,16 @@ export function RegisterForm() {
               >
                 {mutation.isPending ? "Création..." : "S'inscrire"}
               </Button>
+
+              <div className="relative flex items-center gap-4 py-2">
+                <div className="flex-grow h-px bg-white/10"></div>
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+                  OU
+                </span>
+                <div className="flex-grow h-px bg-white/10"></div>
+              </div>
+
+              <GoogleLoginButton />
             </form>
           </Form>
         </CardContent>
