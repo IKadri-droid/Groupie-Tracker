@@ -13,7 +13,7 @@ export function PasswordStrength({ strength, value }: PasswordStrengthProps) {
     value && (
       <div>
         <div className="flex gap-2 mt-2 h-1">
-          {[...Array(5)].map((item, index) => (
+          {[...Array(5)].map((_, index) => (
             <div
               key={index}
               className={`h-full w-full rounded-full transition-all duration-300 ${

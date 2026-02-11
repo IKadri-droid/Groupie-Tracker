@@ -1,6 +1,6 @@
 import type { Concert } from "@/features/artists";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Calendar, Clock, Ticket, Users, Heart } from "lucide-react";
+import { MapPin, Clock, Ticket, Heart } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useNavigate } from "@tanstack/react-router"; // Pour la redirection
 

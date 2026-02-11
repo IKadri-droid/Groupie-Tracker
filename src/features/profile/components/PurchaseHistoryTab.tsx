@@ -2,13 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getUserHistory, type OrderHistory } from "../api/profileApi";
 import { useAuthStore } from "@/features/auth";
 import { Card } from "@/shared/components/ui/card";
-import {
-  ShoppingBag,
-  Calendar,
-  MapPin,
-  CheckCircle2,
-  Clock,
-} from "lucide-react";
+import { ShoppingBag, Calendar, MapPin } from "lucide-react";
 
 export function PurchaseHistoryTab() {
   const token = useAuthStore((state) => state.token);

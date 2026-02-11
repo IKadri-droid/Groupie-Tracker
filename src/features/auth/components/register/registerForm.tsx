@@ -71,7 +71,7 @@ export function RegisterForm() {
   // La mutation TanStack Query
   const mutation = useMutation({
     mutationFn: registerUser,
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Votre compte a bien été crée !");
       navigate({ to: "/login" }); //redirige vers page login
     },

@@ -23,16 +23,8 @@ import { useAuthStore } from "../features/auth/store/authStore";
 import { API_BASE_URL } from "@/shared/config/api";
 
 function RouteComponent() {
-  const {
-    artistName,
-    image,
-    image_concert,
-    venue,
-    date,
-    city,
-    price,
-    concertId,
-  } = Route.useSearch();
+  const { artistName, image_concert, venue, date, city, price, concertId } =
+    Route.useSearch();
   const [standardQty, setStandardQty] = useState(0);
   const [vipQty, setVipQty] = useState(0);
   const { token, user } = useAuthStore();
@@ -86,7 +78,7 @@ function RouteComponent() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Erreur backend:", response.status, errorText);
+        console.error("Erreur bacskend:", response.status, errorText);
         if (response.status === 401) {
           alert("Session expirée. Veuillez vous reconnecter.");
           return;
