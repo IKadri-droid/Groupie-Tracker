@@ -79,6 +79,12 @@ func CreateUser(user *User) error {
 	return err
 }
 
+func CreateGoogleUser(user *User, googleID string) error {
+	query := "INSERT INTO users (email, username, google_id, password) VALUES ($1, $2, $3, $4)"
+	_, err := core.DB.Exec(query, user.Email, user.Username, googleID, "") // Mot de passe vide pour Google
+	return err
+}
+
 func GetUserByEmail(email string) (*User, error) {
 	var user User
 	query := "SELECT id, email, username, password, role, created_at FROM users WHERE email = $1"

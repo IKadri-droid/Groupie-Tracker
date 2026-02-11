@@ -112,9 +112,14 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "https://groupie-tracker-ynov.vercel.app"
+	}
+
 	params := &stripe.CheckoutSessionParams{
-		SuccessURL: stripe.String("http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}"),
-		CancelURL:  stripe.String("http://localhost:3000/cancel"),
+		SuccessURL: stripe.String(frontendURL + "/success?session_id={CHECKOUT_SESSION_ID}"),
+		CancelURL:  stripe.String(frontendURL + "/cancel"),
 		LineItems:  lineItems,
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
 	}

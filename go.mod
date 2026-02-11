@@ -9,3 +9,8 @@ require (
 	github.com/stripe/stripe-go/v81 v81.2.0
 	golang.org/x/crypto v0.47.0
 )
+
+require (
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	golang.org/x/oauth2 v0.35.0 // indirect
+)

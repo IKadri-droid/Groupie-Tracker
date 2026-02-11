@@ -27,6 +27,8 @@ func main() {
 	// --- AUTH ---
 	http.HandleFunc("/api/login", auth.HandleLogin)
 	http.HandleFunc("/api/register", auth.HandleRegister)
+	http.HandleFunc("/api/auth/google/login", auth.HandleGoogleLogin)
+	http.HandleFunc("/api/auth/google/callback", auth.HandleGoogleCallback)
 
 	// --- ARTISTS ---
 	http.HandleFunc("/api/artists", artists.HandleArtists)

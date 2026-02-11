@@ -27,9 +27,8 @@ WORKDIR /app
 # Copy the built binary from the builder stage
 COPY --from=builder /app/main .
 
-# Copy migrations and .env
+# Copy migrations
 COPY --from=builder /app/migrations ./migrations
-COPY --from=builder /app/.env ./.env
 
 # Expose backend port
 EXPOSE 8080
