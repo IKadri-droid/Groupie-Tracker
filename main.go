@@ -48,8 +48,13 @@ func main() {
 	http.HandleFunc("/api/create-checkout-session", payment.HandleCreateCheckoutSession)
 	http.HandleFunc("/api/confirm-payment", payment.HandlePaymentConfirm)
 
+<<<<<<< Updated upstream
 	// 3. Application du Middleware Global (CORS)
 	handler := core.CORSMiddleware(http.DefaultServeMux)
+=======
+	// 3. Application des Middlewares Globaux (CORS + Rate Limiting)
+	handler := core.CORSMiddleware(core.RateLimitMiddleware(http.DefaultServeMux))
+>>>>>>> Stashed changes
 
 	port := ":8080"
 	fmt.Println("🚀 Professional REST API Server started on http://localhost" + port)

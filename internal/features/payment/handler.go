@@ -148,7 +148,14 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&req)
 
 	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
-	s, _ := session.Get(req.SessionID, nil)
+	s, err := session.Get(req.SessionID, nil)
+	if err != nil {
+		log.Printf("❌ Erreur Stripe session.Get: %v\n", err)
+		http.Error(w, "Erreur Stripe", http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("🔍 Vérification paiement Session: %s, Statut Stripe: %s\n", s.ID, s.PaymentStatus)
 
 	if s.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
 		affected, err := UpdateOrderStatusByStripeID(s.ID, "paid")
@@ -158,22 +165,25 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if affected > 0 {
-			log.Printf("✅ Commande %s payée ! Envoi email...\n", s.ID)
-			dbEmail, user, artist, loc, date, venue, amount, err := GetOrderDetailsForEmail(s.ID)
+		log.Printf("📊 Commande %s - Lignes affectées par Update: %d\n", s.ID, affected)
 
-			// Si Stripe nous donne un email (celui saisi au paiement), on l'utilise en priorité
-			emailToSend := dbEmail
-			if s.CustomerDetails != nil && s.CustomerDetails.Email != "" {
-				emailToSend = s.CustomerDetails.Email
-				log.Printf("ℹ️ Utilisation de l'email Stripe : %s\n", emailToSend)
-			}
+		if affected > 0 {
+			log.Printf("✅ Commande %s confirmée en base. Récupération détails pour email...\n", s.ID)
+			dbEmail, user, artist, loc, date, venue, amount, err := GetOrderDetailsForEmail(s.ID)
 
 			if err != nil {
 				log.Printf("❌ Erreur récupération détails email: %v\n", err)
 			} else {
+				// Si Stripe nous donne un email (celui saisi au paiement), on l'utilise en priorité
+				emailToSend := dbEmail
+				if s.CustomerDetails != nil && s.CustomerDetails.Email != "" {
+					emailToSend = s.CustomerDetails.Email
+					log.Printf("ℹ️ Utilisation de l'email Stripe : %s (Email DB: %s)\n", emailToSend, dbEmail)
+				}
+
 				// Lancement asynchrone mais avec log
 				go func() {
+					log.Printf("✉️ Tentative d'envoi email à %s...\n", emailToSend)
 					if err := SendTicketEmail(emailToSend, user, artist, loc, date, venue, amount, s.ID); err != nil {
 						log.Printf("❌ ERREUR ENVOI EMAIL à %s: %v\n", emailToSend, err)
 					} else {
@@ -182,8 +192,11 @@ func HandlePaymentConfirm(w http.ResponseWriter, r *http.Request) {
 				}()
 			}
 		} else {
-			log.Printf("⚠️ Commande %s déjà payée ou introuvable (affected: %d)\n", s.ID, affected)
+			log.Printf("⚠️ Commande %s déjà confirmée ou introuvable en base (SessionID: %s)\n", s.ID, s.ID)
 		}
 		json.NewEncoder(w).Encode(map[string]string{"status": "success"})
+	} else {
+		log.Printf("❌ Statut de paiement Stripe insuffisant: %s\n", s.PaymentStatus)
+		json.NewEncoder(w).Encode(map[string]string{"status": "pending", "message": "Le paiement n'a pas encore été confirmé par Stripe"})
 	}
 }

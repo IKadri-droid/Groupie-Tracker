@@ -8,7 +8,6 @@ import (
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	core.EnableCORS(w, r)
 	if r.Method == "OPTIONS" {
 		return
 	}
@@ -53,7 +52,6 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
-	core.EnableCORS(w, r)
 	if r.Method == "OPTIONS" {
 		return
 	}

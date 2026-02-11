@@ -1,6 +1,9 @@
 package core
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 // EnableCORS est utilisé comme helper dans les handlers
 func EnableCORS(w http.ResponseWriter, r *http.Request) {
@@ -10,9 +13,15 @@ func EnableCORS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	origin := r.Header.Get("Origin")
-	isAllowed := false
 
+	// Si l'origin est vide (requête directe), on ne met pas d'en-tête spécifique
+	if origin == "" {
+		return
+	}
+
+	isAllowed := false
 	for _, o := range allowedOrigins {
+		// Comparaison exacte pour la sécurité
 		if o == origin {
 			isAllowed = true
 			break
@@ -22,8 +31,8 @@ func EnableCORS(w http.ResponseWriter, r *http.Request) {
 	if isAllowed {
 		w.Header().Set("Access-Control-Allow-Origin", origin)
 	} else {
-		// Par défaut, on peut laisser localhost pour le dev ou ne rien mettre
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		// En mode dév ou si non listé, on laisse le navigateur bloquer mais on log
+		log.Printf("⚠️ Tentative d'accès CORS bloquée pour l'origine: %s\n", origin)
 	}
 
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
