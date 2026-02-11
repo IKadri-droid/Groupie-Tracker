@@ -139,7 +139,7 @@ export function RegisterForm() {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-pink-400" />
+                    <FormMessage className="text-slate-400" />
                   </FormItem>
                 )}
               />
@@ -188,7 +188,7 @@ export function RegisterForm() {
                       strength={passwordStrength}
                       value={form.watch("password")}
                     />
-                    <FormMessage className="text-pink-400" />
+                    <FormMessage className="text-slate-400" />
                   </FormItem>
                 )}
               />
@@ -209,7 +209,7 @@ export function RegisterForm() {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="text-pink-400" />
+                    <FormMessage className="text-slate-400" />
                   </FormItem>
                 )}
               />
@@ -223,7 +223,7 @@ export function RegisterForm() {
                     <FormControl>
                       <input
                         type="checkbox"
-                        className="h-4 w-4 mt-1 rounded border-white/20 bg-white/5 text-pink-500 focus:ring-pink-500 focus:ring-offset-0"
+                        className="h-4 w-4 mt-1 rounded border-white/20 bg-white/5 text-slate-500 focus:ring-slate-500 focus:ring-offset-0"
                         checked={field.value}
                         onChange={field.onChange}
                       />
@@ -233,20 +233,20 @@ export function RegisterForm() {
                         J'accepte la{" "}
                         <Link
                           to="/privacy"
-                          className="text-pink-400 hover:text-pink-300 underline underline-offset-4"
+                          className="text-slate-400 hover:text-slate-300 underline underline-offset-4"
                         >
                           politique de confidentialité
                         </Link>{" "}
                         et les{" "}
                         <Link
                           to="/legal"
-                          className="text-pink-400 hover:text-pink-300 underline underline-offset-4"
+                          className="text-slate-400 hover:text-slate-300 underline underline-offset-4"
                         >
                           mentions légales
                         </Link>
                         .
                       </FormLabel>
-                      <FormMessage className="text-pink-400" />
+                      <FormMessage className="text-slate-400" />
                     </div>
                   </FormItem>
                 )}
