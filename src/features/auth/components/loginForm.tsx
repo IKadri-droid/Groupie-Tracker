@@ -28,9 +28,7 @@ import { Eye, EyeOff } from "lucide-react";
 // Schéma de validation Zod
 const loginSchema = z.object({
   email: z.string().email({ message: "Email invalide" }),
-  password: z
-    .string()
-    .min(8, { message: "Le mot de passe doit faire au moins 8 caractères" }),
+  password: z.string(),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -44,7 +42,10 @@ export function LoginForm() {
     onSuccess: (data) => {
       // 1. On enregistre dans l'état global
       setLogin(data.user, data.token);
-      toast.success("Connexion réussie ! Bienvenue " + data.user.email);
+      toast.success(
+        "Connexion réussie ! Bienvenue " +
+          (data.user.username || data.user.email),
+      );
       navigate({ to: "/" }); //redirige vers page d'accueil
     },
     onError: (error: Error) => {
