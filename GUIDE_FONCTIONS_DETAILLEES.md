@@ -5,6 +5,7 @@
 ### CORE (Cœur du système)
 - [database.go](#databasego) - 2 fonctions
 - [middleware.go](#middlewarego) - 2 fonctions  
+- [ratelimit.go](#ratelimitgo) - 1 fonction
 - [tokens.go](#tokensgo) - 3 fonctions
 
 ### AUTH (Authentification)
@@ -117,6 +118,29 @@ func CORSMiddleware(next http.Handler) http.Handler
 **Retourne :** Un nouveau `http.Handler`
 
 **Appelée par :** `main()` ligne 50
+
+---
+
+## 🛡️ CORE - ratelimit.go
+
+### 5. `RateLimitMiddleware(next)` - Limitation de débit et Sécurité
+
+**Signature :**
+```go
+func RateLimitMiddleware(next http.Handler) http.Handler
+```
+
+**Rôle :** Protège l'API contre les abus en limitant le nombre de requêtes par IP.
+
+**Fonctionnement (Règles métiers) :**
+1. **Seuil :** 5 requêtes maximum par minute et par adresse IP.
+2. **Détection :** Identifie l'utilisateur via son adresse IP (gère les en-têtes `X-Forwarded-For` pour Azure/Vercel).
+3. **Punition :** Si le seuil est dépassé, l'adresse IP est bannie pendant **10 minutes**.
+4. **Récupération :** Une fois le délai passé, l'IP est automatiquement débloquée.
+
+**Code de retour :** `429 Too Many Requests` (avec message explicatif en JSON).
+
+**Appelée par :** `main()` ligne 52, elle enveloppe toutes les autres routes.
 
 ---
 
