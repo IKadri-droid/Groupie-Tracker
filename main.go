@@ -49,7 +49,7 @@ func main() {
 	http.HandleFunc("/api/confirm-payment", payment.HandlePaymentConfirm)
 
 	// 3. Application des Middlewares Globaux (CORS + Rate Limiting)
-	handler := core.RateLimitMiddleware(core.CORSMiddleware(http.DefaultServeMux))
+	handler := core.CORSMiddleware(core.RateLimitMiddleware(http.DefaultServeMux))
 
 	port := ":8080"
 	fmt.Println("🚀 Professional REST API Server started on http://localhost" + port)
