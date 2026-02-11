@@ -52,18 +52,18 @@ export function PurchaseHistoryTab() {
         {history.map((order) => (
           <Card
             key={order.id}
-            className="bg-slate-900/50 border-white/10 text-white overflow-hidden hover:bg-slate-900 transition-colors"
+            className="bg-slate-900/50 border-white/10 text-white overflow-hidden hover:bg-slate-900 transition-colors py-4"
           >
             <div className="flex flex-col md:flex-row">
               {/* Image Event */}
-              <div className="w-full md:w-32 h-32 bg-slate-800">
+              <div className="w-full md:w-32 h-32 ml-4">
                 <img
                   src={
                     order.image_concert ||
-                    "https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=300&h=300&auto=format&fit=crop"
+                    "https://stadibox.sfo2.digitaloceanspaces.com/Captura_de_pantalla_2025_04_17_a_la_s_10_07_53_p_m_8ef14b205f.png"
                   }
                   alt={order.venue}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-lg"
                 />
               </div>
 
