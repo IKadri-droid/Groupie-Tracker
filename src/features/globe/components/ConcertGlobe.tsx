@@ -3,6 +3,7 @@ import {
   useMemo,
   useRef,
   useEffect,
+  useState,
   forwardRef,
   useImperativeHandle,
 } from "react";
@@ -29,6 +30,10 @@ const ConcertGlobe = forwardRef<ConcertGlobeHandle, ConcertGlobeProps>(
 
     const objectsMap = useRef(new Map<any, THREE.Group>());
 
+    // Déclaration de dimensions et containerRef avant les useEffects
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
     useImperativeHandle(ref, () => ({
       flyTo: (lat: number, lng: number) => {
         if (globeEl.current) {
@@ -47,16 +52,27 @@ const ConcertGlobe = forwardRef<ConcertGlobeHandle, ConcertGlobeProps>(
 
     useEffect(() => {
       if (globeEl.current) {
-        globeEl.current.controls().enableZoom = false; //desactive le zoom
+        globeEl.current.controls().enableZoom = false; // Désactive le zoom avec la souris
         globeEl.current.controls().autoRotate = true;
-        globeEl.current.controls().autoRotateSpeed = 0.5; //vitesse de rotation
+        globeEl.current.controls().autoRotateSpeed = 0.5; // Vitesse de rotation
+
+        // Définir l'altitude (zoom) en fonction de la largeur de l'écran
+        let altitude = 1.7; // Desktop par défaut
+        if (dimensions.width > 0) {
+          if (dimensions.width < 768) {
+            altitude = 2; // Mobile - on dézoome pour voir le globe entier sans couper l'atmosphère
+          } else if (dimensions.width < 1024) {
+            altitude = 2.2; // Tablette
+          }
+        }
+
         globeEl.current.pointOfView({
           lat: 30,
           lng: 10,
-          altitude: 1.7,
+          altitude: altitude,
         });
       }
-    }, []);
+    }, [dimensions.width]);
 
     const pointsData = useMemo(() => {
       return artists.flatMap((artist) => {
@@ -81,69 +97,87 @@ const ConcertGlobe = forwardRef<ConcertGlobeHandle, ConcertGlobeProps>(
       });
     }, [artists, selectedCoords]);
 
+    useEffect(() => {
+      const el = containerRef.current;
+      if (!el) return;
+      const obs = new ResizeObserver(([entry]) => {
+        const { width, height } = entry.contentRect;
+        setDimensions({ width, height });
+      });
+      obs.observe(el);
+      return () => obs.disconnect();
+    }, []);
+
     return (
-      <div className="h-full w-full flex items-center justify-center overflow-hidden">
-        <Globe
-          ref={globeEl}
-          globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-          backgroundColor="rgba(0,0,0,0)"
-          // --- 3D OBJECTS ---
-          objectsData={pointsData}
-          objectLat="lat"
-          objectLng="lng"
-          objectAltitude={0}
-          objectThreeObject={(d: any) => {
-            // Création du groupe (pour combiner tige + boule)
-            const group = new THREE.Group();
+      <div
+        ref={containerRef}
+        className="h-full w-full flex items-center justify-center overflow-hidden"
+      >
+        {dimensions.width > 0 && (
+          <Globe
+            ref={globeEl}
+            width={dimensions.width}
+            height={dimensions.height}
+            globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+            backgroundColor="rgba(0,0,0,0)"
+            // --- 3D OBJECTS ---
+            objectsData={pointsData}
+            objectLat="lat"
+            objectLng="lng"
+            objectAltitude={0}
+            objectThreeObject={(d: any) => {
+              // Création du groupe (pour combiner tige + boule)
+              const group = new THREE.Group();
 
-            group.rotation.x = Math.PI / 2;
-            // 1. La tige (Cylindre gris)
-            const poleGeometry = new THREE.CylinderGeometry(0.5, 0.2, 10, 8);
-            const poleMaterial = new THREE.MeshLambertMaterial({
-              color: 0xcccccc,
-            });
-            const pole = new THREE.Mesh(poleGeometry, poleMaterial);
-            pole.position.y = 1.5; // On remonte la tige pour que la base soit au sol
-            group.add(pole);
+              group.rotation.x = Math.PI / 2;
+              // 1. La tige (Cylindre gris)
+              const poleGeometry = new THREE.CylinderGeometry(0.5, 0.2, 10, 8);
+              const poleMaterial = new THREE.MeshLambertMaterial({
+                color: 0xcccccc,
+              });
+              const pole = new THREE.Mesh(poleGeometry, poleMaterial);
+              pole.position.y = 1.5; // On remonte la tige pour que la base soit au sol
+              group.add(pole);
 
-            // 2. La boule (Sphère colorée)
-            const sphereGeometry = new THREE.SphereGeometry(1.5, 16, 16);
-            const sphereMaterial = new THREE.MeshLambertMaterial({
-              color: d.color,
-            });
-            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-            sphere.position.y = 6 + 0.5; // Posée sur la tige
-            group.add(sphere);
+              // 2. La boule (Sphère colorée)
+              const sphereGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+              const sphereMaterial = new THREE.MeshLambertMaterial({
+                color: d.color,
+              });
+              const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+              sphere.position.y = 6 + 0.5; // Posée sur la tige
+              group.add(sphere);
 
-            objectsMap.current.set(d, group);
+              objectsMap.current.set(d, group);
 
-            group.scale.set(0.5, 0.5, 0.5);
+              group.scale.set(0.5, 0.5, 0.5);
 
-            return group;
-          }}
-          onObjectHover={(obj: any, prevObj: any) => {
-            // 3. On récupère le vrai Objet 3D via la Map
-            const threeObj = objectsMap.current.get(obj);
-            const prevThreeObj = objectsMap.current.get(prevObj);
-            if (prevThreeObj) {
-              // prevThreeObj.scale.set(0.5, 0.5, 0.5);
-              animateScale(prevThreeObj, 0.5); // Animation fluide vers 0.5
-            }
+              return group;
+            }}
+            onObjectHover={(obj: any, prevObj: any) => {
+              // 3. On récupère le vrai Objet 3D via la Map
+              const threeObj = objectsMap.current.get(obj);
+              const prevThreeObj = objectsMap.current.get(prevObj);
+              if (prevThreeObj) {
+                // prevThreeObj.scale.set(0.5, 0.5, 0.5);
+                animateScale(prevThreeObj, 0.5); // Animation fluide vers 0.5
+              }
 
-            if (threeObj) {
-              // threeObj.scale.set(0.8, 0.8, 0.8);
-              animateScale(threeObj, 0.8); // Animation fluide vers 0.8
-            }
+              if (threeObj) {
+                // threeObj.scale.set(0.8, 0.8, 0.8);
+                animateScale(threeObj, 0.8); // Animation fluide vers 0.8
+              }
 
-            document.body.style.cursor = obj ? "pointer" : "default";
-          }}
-          onObjectClick={(obj: any) => {
-            if (onPointClick && obj.artist) {
-              onPointClick(obj.artist, obj.concertId);
-            }
-          }}
-          onGlobeReady={() => {}}
-        />
+              document.body.style.cursor = obj ? "pointer" : "default";
+            }}
+            onObjectClick={(obj: any) => {
+              if (onPointClick && obj.artist) {
+                onPointClick(obj.artist, obj.concertId);
+              }
+            }}
+            onGlobeReady={() => {}}
+          />
+        )}
       </div>
     );
   },

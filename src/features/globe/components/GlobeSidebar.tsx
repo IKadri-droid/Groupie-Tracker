@@ -97,7 +97,7 @@ export default function GlobeSidebar({
   };
 
   return (
-    <Card className="w-[310px] h-[800px] overflow-hidden rounded-3xl p-4 bg-gradient-to-br from-white/15 via-white/5 to-white/10 border border-white/40 backdrop-blur-xl shadow-[inset_0_2px_3px_rgba(255,255,255,0.6),inset_0_-1px_2px_rgba(255,255,255,0.3),0_8px_32px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.1)] text-white ">
+    <Card className="w-full lg:w-[310px] h-auto max-h-[500px] lg:max-h-none lg:h-[800px] overflow-hidden rounded-3xl p-4 bg-gradient-to-br from-white/15 via-white/5 to-white/10 border border-white/40 backdrop-blur-xl shadow-[inset_0_2px_3px_rgba(255,255,255,0.6),inset_0_-1px_2px_rgba(255,255,255,0.3),0_8px_32px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.1)] text-white ">
       <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
         Les Concerts
       </h1>

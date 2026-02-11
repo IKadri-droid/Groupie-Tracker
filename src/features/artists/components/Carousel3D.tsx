@@ -123,7 +123,7 @@ const Carousel3D = forwardRef<CarouselHandle, Carousel3DProps>(
 
     return (
       <div
-        className="relative w-full h-[500px] flex items-center overflow-hidden perspective-container"
+        className="relative w-full h-[450px] md:h-[450px] lg:h-[500px] flex items-center overflow-hidden perspective-container"
         ref={containerRef}
       >
         <motion.div

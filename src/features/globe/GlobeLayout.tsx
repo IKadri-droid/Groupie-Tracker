@@ -34,24 +34,24 @@ export default function GlobeLayout({
   } | null>(null);
 
   return (
-    <div className="flex h-[1000px] w-full bg-transparent rounded-xl overflow-hidden relative mt-8">
-      {/* Menu Latéral en Absolute */}
-      <div className="absolute top-4 left-4 z-20 h-[calc(100%-2rem)] flex items-center">
+    <div className="flex flex-col lg:flex-row lg:h-[1000px] w-full bg-transparent rounded-xl overflow-hidden relative mt-12 lg:mt-8">
+      {/* Le Globe prend toute la place — affiché en premier sur mobile */}
+      <div className="w-full flex items-center justify-center h-[500px] lg:h-full">
+        <ConcertGlobe
+          ref={globeRef}
+          artists={artists}
+          onPointClick={handlePointClick}
+          selectedCoords={selectedCoords}
+        />
+      </div>
+      {/* Menu Latéral — en dessous sur mobile, overlay sur desktop */}
+      <div className="w-full px-4 py-4 lg:absolute lg:top-4 lg:left-4 lg:z-20 lg:h-[calc(100%-2rem)] lg:flex lg:items-center lg:w-auto lg:p-0">
         <GlobeSidebar
           artists={artists}
           onConcertClick={handleConcertClick}
           expandedConcertId={expandedConcertId}
           setExpandedConcertId={setExpandedConcertId}
           externalSearchQuery={searchQuery}
-        />
-      </div>
-      {/* Le Globe prend toute la place */}
-      <div className="w-full flex items-center justify-center ">
-        <ConcertGlobe
-          ref={globeRef}
-          artists={artists}
-          onPointClick={handlePointClick}
-          selectedCoords={selectedCoords}
         />
       </div>
     </div>

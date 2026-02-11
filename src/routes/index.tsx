@@ -142,7 +142,7 @@ function App() {
       )}
 
       {/* Container pour le logo et le titre */}
-      <div className="w-full p-8">
+      <div className="w-full p-4 md:p-8">
         <div className="max-w-4xl mx-auto relative flex flex-col items-center">
           {/* Effet de forme en dégradé derrière le logo */}
           <div className="hero-glow" />
@@ -150,24 +150,26 @@ function App() {
           <img
             src="/logo.png"
             alt="logo"
-            className="pt-70 pb-70 relative z-10"
+            className="pt-72 pb-60 md:pt-60 md:pb-60 lg:pt-90 lg:pb-90 relative z-10 max-w-full"
           />
         </div>
       </div>
 
       {/* En-tête full width pour permettre au bouton d'être à droite */}
-      <div className="relative flex items-center justify-center mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent w-fit">
+      <div className="relative flex items-center justify-center mb-4 md:mb-8 px-4 md:px-0">
+        <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent w-fit">
           Les Artistes
         </h1>
 
         <div
-          className="absolute right-0 flex items-center h-10 pr-8"
+          className="absolute right-0 flex items-center h-10 pr-4 md:pr-8"
           ref={searchRef}
         >
           <motion.div
             initial={false}
-            animate={{ width: isSearchOpen ? 300 : 40 }}
+            animate={{
+              width: isSearchOpen ? (window.innerWidth < 640 ? 220 : 300) : 40,
+            }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             onClick={() => !isSearchOpen && setIsSearchOpen(true)}
             className={`relative h-10 overflow-hidden bg-gradient-to-br from-black/70 via-gray-900/80 to-black/75 border border-white/20 shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_8px_32px_rgba(0,0,0,0.4)] rounded-xl ${!isSearchOpen ? "cursor-pointer" : ""}`}
@@ -208,7 +210,7 @@ function App() {
                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                className="absolute top-12 left-0 right-0 bg-slate-900/95 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[100] backdrop-blur-xl min-w-[300px]"
+                className="absolute top-12 right-0 bg-slate-900/95 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[100] backdrop-blur-xl w-[280px] sm:min-w-[300px]"
               >
                 <div className="max-h-60 overflow-y-auto p-1 text-slate-200">
                   {filteredArtists.length > 0 ? (
@@ -251,7 +253,7 @@ function App() {
 
       {/* Carousel 3D des artistes */}
       {!isLoading && !error && (
-        <div className="w-full -mt-4">
+        <div className="w-full -mt-2 md:-mt-4 mb-8 md:mb-12">
           <Carousel3D
             ref={carouselRef}
             artists={artists}

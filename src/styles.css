@@ -205,8 +205,8 @@ code {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 800px;
-  height: 500px;
+  width: 300px;
+  height: 200px;
   background: radial-gradient(
     circle,
     rgba(168, 85, 247, 0.4) 0%,
@@ -214,11 +214,27 @@ code {
     rgba(147, 51, 234, 0.1) 50%,
     transparent 80%
   );
-  filter: blur(100px);
+  filter: blur(60px);
   pointer-events: none;
   z-index: -1;
   animation: pulse-glow 10s ease-in-out infinite;
   opacity: 0.7;
+}
+
+@media (min-width: 768px) {
+  .hero-glow {
+    width: 600px;
+    height: 400px;
+    filter: blur(80px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-glow {
+    width: 800px;
+    height: 500px;
+    filter: blur(100px);
+  }
 }
 
 
