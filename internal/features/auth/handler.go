@@ -8,6 +8,7 @@ import (
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
+	core.EnableCORS(w)
 	if r.Method == "OPTIONS" {
 		return
 	}
@@ -44,14 +45,14 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		"message": "Bienvenue !",
 		"token":   token,
 		"user": map[string]string{
-			"email":    foundUser.Email,
-			"role":     foundUser.Role,
-			"username": foundUser.Username,
+			"email": foundUser.Email,
+			"role":  foundUser.Role,
 		},
 	})
 }
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
+	core.EnableCORS(w)
 	if r.Method == "OPTIONS" {
 		return
 	}

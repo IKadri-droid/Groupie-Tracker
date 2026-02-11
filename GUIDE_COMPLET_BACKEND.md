@@ -12,9 +12,8 @@
 5. [Le dossier CORE (le cœur)](#le-dossier-core)
 6. [Les FEATURES (fonctionnalités)](#les-features)
 7. [La base de données](#la-base-de-données)
-8. [Sécurité : Rate Limiting](#sécurité--rate-limiting)
-9. [Le flux complet d'une requête](#le-flux-complet-dune-requête)
-10. [Glossaire des termes](#glossaire-des-termes)
+8. [Le flux complet d'une requête](#le-flux-complet-dune-requête)
+9. [Glossaire des termes](#glossaire-des-termes)
 
 ---
 
@@ -73,7 +72,6 @@ backend-groupie/
 │   ├── core/                  ← Le cœur (DB, CORS, JWT)
 │   │   ├── database.go        ← Connexion à PostgreSQL
 │   │   ├── middleware.go      ← Gestion CORS (autorisations frontend)
-│   │   ├── ratelimit.go       ← Protection contre les attaques (Rate Limiter)
 │   │   └── tokens.go          ← Création/validation des JWT
 │   │
 │   └── features/              ← Fonctionnalités métier
@@ -288,20 +286,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 
 ---
 
-### 3. `ratelimit.go` - Protection contre les attaques
-
-#### **Le concept : 5 requêtes / 1 minute**
-C'est un système de sécurité professionnel qui protège ton serveur contre les abus (scripts malveillants, attaques par force brute).
-
-**La règle :**
-- Si un utilisateur fait plus de **5 requêtes en moins d'une minute**.
-- Son adresse IP est **bloquée pendant 10 minutes**.
-
-**Pourquoi ?** Pour éviter qu'un robot ne sature ton serveur ou n'essaie de deviner des mots de passe.
-
----
-
-### 4. `tokens.go` - Sécurité JWT
+### 3. `tokens.go` - Sécurité JWT
 
 #### **Fonction `GenerateToken()`**
 ```go

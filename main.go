@@ -27,8 +27,6 @@ func main() {
 	// --- AUTH ---
 	http.HandleFunc("/api/login", auth.HandleLogin)
 	http.HandleFunc("/api/register", auth.HandleRegister)
-	http.HandleFunc("/api/auth/google/login", auth.HandleGoogleLogin)
-	http.HandleFunc("/api/auth/google/callback", auth.HandleGoogleCallback)
 
 	// --- ARTISTS ---
 	http.HandleFunc("/api/artists", artists.HandleArtists)
@@ -48,8 +46,8 @@ func main() {
 	http.HandleFunc("/api/create-checkout-session", payment.HandleCreateCheckoutSession)
 	http.HandleFunc("/api/confirm-payment", payment.HandlePaymentConfirm)
 
-	// 3. Application des Middlewares Globaux (CORS + Rate Limiting)
-	handler := core.CORSMiddleware(core.RateLimitMiddleware(http.DefaultServeMux))
+	// 3. Application du Middleware Global (CORS)
+	handler := core.CORSMiddleware(http.DefaultServeMux)
 
 	port := ":8080"
 	fmt.Println("🚀 Professional REST API Server started on http://localhost" + port)
