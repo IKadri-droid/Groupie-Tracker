@@ -13,7 +13,10 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
+    <header
+      className="fixed left-1/2 -translate-x-1/2 z-50"
+      style={{ top: "calc(env(safe-area-inset-top) + 24px)" }}
+    >
       <LayoutGroup>
         <nav className="flex items-center gap-1 p-1.5 rounded-full bg-gradient-to-br from-white/15 via-white/5 to-white/10 border border-white/40 backdrop-blur-xl shadow-[inset_0_2px_3px_rgba(255,255,255,0.6),inset_0_-1px_2px_rgba(255,255,255,0.3),0_8px_32px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.1)]">
           {/* Navigation items */}

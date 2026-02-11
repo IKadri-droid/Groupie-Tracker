@@ -32,7 +32,15 @@ const ConcertGlobe = forwardRef<ConcertGlobeHandle, ConcertGlobeProps>(
 
     // Déclaration de dimensions et containerRef avant les useEffects
     const containerRef = useRef<HTMLDivElement>(null);
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const [dimensions, setDimensions] = useState({
+      width: typeof window !== "undefined" ? window.innerWidth : 0,
+      height:
+        typeof window !== "undefined"
+          ? window.innerWidth < 1024
+            ? 500
+            : 1000
+          : 0,
+    });
 
     useImperativeHandle(ref, () => ({
       flyTo: (lat: number, lng: number) => {
@@ -118,7 +126,7 @@ const ConcertGlobe = forwardRef<ConcertGlobeHandle, ConcertGlobeProps>(
             ref={globeEl}
             width={dimensions.width}
             height={dimensions.height}
-            globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+            globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
             backgroundColor="rgba(0,0,0,0)"
             // --- 3D OBJECTS ---
             objectsData={pointsData}

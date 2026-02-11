@@ -110,7 +110,10 @@ function App() {
   };
 
   return (
-    <div className="relative min-h-screen text-white">
+    <div
+      className="relative min-h-screen text-white"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 24px)" }}
+    >
       {/* Background base (slate) */}
       <div
         className="fixed inset-0 -z-30"
