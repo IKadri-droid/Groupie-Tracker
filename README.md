@@ -1,64 +1,191 @@
-# 🎵 Groupie Tracker - Backend 🚀
+# 🎵 Groupie Tracker
 
-Bienvenue dans le "cerveau" de Groupie Tracker ! Ce dossier contient toute la logique et les données qui permettent au site de fonctionner correctement.
+**Groupie Tracker** est une plateforme web (et mobile via Capacitor) permettant de découvrir des artistes musicaux, de consulter leurs prochaines dates de concert, de gérer ses favoris et d'acheter des tickets en ligne.
 
----
+Le projet est découpé en deux applications indépendantes :
 
-## 📝 C'est quoi ce projet ?
+| Partie | Rôle | Stack |
+|---|---|---|
+| **Frontend** | Interface utilisateur (recherche, fiches artistes, globe des concerts, compte, paiement) | React 19 + Vite + TanStack Router/Query |
+| **Backend** | API REST (auth, données artistes, favoris, paiement) | Go + PostgreSQL |
 
-**Groupie Tracker** est une plateforme moderne permettant de découvrir des artistes musicaux, de consulter leurs prochaines dates de concert et de gérer ses artistes favoris. 
-
-Imaginez cela comme un annuaire musical intelligent et interactif.
-
----
-
-## 🧠 Comment ça marche ? (Simplement)
-
-Pour que vous puissiez voir les photos des artistes et leurs dates de concert, le projet est divisé en deux parties :
-
-1.  **Le Backend (ce dossier)** : C'est le moteur. Il va chercher les informations sur les artistes, sécurise vos comptes utilisateurs, et gère les paiements pour les tickets. Sans lui, le site serait une coquille vide.
-2.  **Le Frontend** : C'est la partie visible (l'interface). C'est ce que vous utilisez pour cliquer, faire défiler et admirer le design.
+> 🌐 **Démo en ligne** : [groupie-tracker-ynov.vercel.app](https://groupie-tracker-ynov.vercel.app/)
 
 ---
 
-## 🚀 Comment accéder au site ?
+## 🌟 Fonctionnalités
 
-Pour faire fonctionner le site sur votre ordinateur, suivez ces étapes simples :
-
-### 🛠️ Pré-requis
-Assurez-vous d'avoir installé **Docker Desktop** sur votre machine. C'est l'outil qui permet de lancer le projet en un clic sans se soucier des réglages compliqués.
-
-### 🏃 Lancement rapide (Recommandé)
-1. Ouvrez un terminal à la racine du projet global.
-2. Tapez la commande suivante :
-   ```bash
-   docker-compose up --build
-   ```
-3. Attendez quelques instants que "la machine" démarre.
-
-### 🌐 Accès au site
-Une fois lancé, vous pouvez accéder au site via votre navigateur :
-- 🏠 **Le Site Web (Interface) :** [http://localhost:3000](http://localhost:3000)
-- ⚙️ **Le Serveur (Données) :** [http://localhost:8080](http://localhost:8080)
-- 🏠 **Le Site Web (en ligne):**[https://groupie-tracker-ynov.vercel.app/]
-- ⚙️ **"Lorsque le site Web est en ligne vous pouvez directement y accédez grace a l'url du groupie si dessus"**
+- 🔍 **Recherche d'artistes** en temps réel via l'API Deezer (nom, image, top titres, albums)
+- 🌍 **Globe interactif** des dates de concerts (`react-globe.gl` / three.js)
+- 👤 **Comptes utilisateurs** : inscription, connexion (JWT), gestion de profil
+- ⭐ **Favoris** : sauvegarde des artistes préférés, historique de consultation
+- 💳 **Billetterie** : session de paiement Stripe, page de confirmation/annulation
+- 🛡️ **Sécurité** : reCAPTCHA v3, rate limiting sur les routes sensibles, CORS configuré
+- 📱 **Mobile** : build iOS via Capacitor
+- ⚖️ **Pages légales** : mentions légales, politique de confidentialité (RGPD)
 
 ---
 
-## 🌟 Fonctionnalités clés
+## 🏗️ Architecture
 
-- 🔍 **Recherche Intelligente** : Trouvez vos artistes préférés instantanément.
-- 📅 **Calendrier de Concerts** : Ne ratez aucune date de tournée.
-- 👤 **Espace Client** : Créez un compte pour sauvegarder vos favoris.
-- 💳 **Billetterie** : Système de réservation de tickets (via Stripe).
-- 📧 **Confirmations** : Envoi automatique d'emails après vos achats.
+```
+groupie-tracker/
+├── frontend/   (React 19 + Vite, port 3000)
+│   └── appelle l'API du backend en HTTP (fetch / TanStack Query)
+└── backend/    (Go, port 8080)
+    └── PostgreSQL + API Deezer + Stripe
+```
+
+Le frontend consomme exclusivement l'API REST exposée par le backend ; aucune logique métier (auth, prix, favoris) n'est dupliquée côté client.
+
+### Organisation Git
+
+Les deux applications provenaient historiquement de deux dépôts séparés. Sur ce dépôt, elles cohabitent sous forme de branches préfixées afin de conserver l'intégralité de l'historique de développement de chaque partie :
+
+- `frontend/main`, `frontend/login`, `frontend/docker`, … → toutes les branches du frontend
+- `backend/main`, `backend/login`, `backend/docker`, … → toutes les branches du backend
+
+La branche par défaut du dépôt (`frontend/main`) contient le code du frontend ; basculez sur `backend/main` pour le code du backend.
 
 ---
 
-## 🛠️ Un coup d'œil sous le capot
-*Pour ceux qui veulent en savoir un tout petit peu plus...*
+## 🛠️ Stack technique
 
-Ce backend est construit avec **Go**, un langage réputé pour sa rapidité. Il communique avec une base de données pour se souvenir de tout ce que vous faites sur le site.
+### Frontend (`frontend/main`)
+- **Framework** : React 19 (Vite 7)
+- **Routing** : TanStack Router (file-based)
+- **Data fetching** : TanStack Query
+- **UI** : Tailwind CSS 4, Shadcn UI, Radix UI, Framer Motion, Lucide Icons
+- **3D / Globe** : three.js, react-globe.gl
+- **Formulaires** : React Hook Form + Zod
+- **State** : Zustand
+- **Mobile** : Capacitor (iOS)
+- **Tests** : Vitest
+
+### Backend (`backend/main`)
+- **Langage** : Go 1.24
+- **Base de données** : PostgreSQL (`lib/pq`)
+- **Auth** : JWT (`golang-jwt/jwt`), hashing via `golang.org/x/crypto`
+- **Paiement** : Stripe (`stripe-go`)
+- **Config** : variables d'environnement via `godotenv`
+- **Architecture** : découpage par feature (`internal/features/{artists,auth,payment,user}`) + package `core` (DB, middlewares CORS, rate limiting, tokens)
 
 ---
-*Fait avec ❤️ par Ilyace et Thomas.*
+
+## 🚀 Démarrage rapide
+
+### Prérequis
+- Node.js ≥ 20 et npm
+- Go ≥ 1.24
+- Une base PostgreSQL (locale, Docker, ou hébergée type Neon/Supabase)
+
+Chaque branche de ce dépôt ne contient qu'une seule des deux applications (voir [Organisation Git](#organisation-git)) : clonez le dépôt puis basculez sur la branche voulue avant de suivre les étapes ci-dessous.
+
+### 1. Backend (branche `backend/main`)
+
+```bash
+git checkout backend/main
+cp .env.example .env
+# renseigner DATABASE_URL, RECAPTCHA_SECRET_KEY, STRIPE_SECRET_KEY, PORT
+go run .
+```
+
+Le serveur écoute par défaut sur `http://localhost:8080`. Les migrations SQL présentes dans `migrations/` sont appliquées automatiquement au démarrage.
+
+Variables d'environnement (`.env`) :
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | Chaîne de connexion PostgreSQL |
+| `RECAPTCHA_SECRET_KEY` | Clé secrète Google reCAPTCHA v3 |
+| `STRIPE_SECRET_KEY` | Clé secrète Stripe |
+| `PORT` | Port d'écoute de l'API (8080 par défaut) |
+
+### 2. Frontend (branche `frontend/main`)
+
+```bash
+git checkout frontend/main
+cp .env.example .env
+# renseigner VITE_RECAPTCHA_SITE_KEY
+npm install
+npm run dev
+```
+
+L'application est disponible sur `http://localhost:3000`.
+
+### Build de production
+
+```bash
+# Backend
+go build -o groupie-backend .
+
+# Frontend
+npm run build
+```
+
+### Docker
+
+Chaque application dispose de son propre `Dockerfile` (build multi-stage pour le backend, image `node:20-alpine` en mode dev pour le frontend). Aucun `docker-compose.yml` global n'est fourni actuellement : les deux images sont à construire/lancer séparément, en s'assurant que le frontend pointe vers l'URL du backend et que le backend a accès à sa base de données.
+
+### Mobile (iOS)
+
+```bash
+npm run build
+npx cap sync ios
+npx cap open ios
+```
+
+---
+
+## 📡 API (backend)
+
+| Méthode | Route | Description |
+|---|---|---|
+| `POST` | `/api/register` | Création de compte |
+| `POST` | `/api/login` | Connexion (JWT) |
+| `GET` | `/api/artists` | Liste des artistes |
+| `GET` | `/api/artists/{id}` | Détail d'un artiste |
+| `GET` | `/api/deezer/search` | Recherche d'artiste via Deezer |
+| `GET` | `/api/deezer/albums` | Albums d'un artiste (Deezer) |
+| `GET` | `/api/deezer/top-tracks` | Top titres d'un artiste (Deezer) |
+| `GET` | `/api/profile` | Profil utilisateur connecté |
+| `GET` | `/api/history` | Historique de consultation |
+| `GET`/`POST` | `/api/favorites` | Gestion des favoris |
+| `POST` | `/api/create-checkout-session` | Création d'une session de paiement Stripe |
+| `POST` | `/api/confirm-payment` | Confirmation d'un paiement |
+
+Toutes les routes sont protégées par un middleware CORS global ; les routes d'authentification sont en plus soumises à un rate limiting (5 requêtes/minute, blocage 10 minutes en cas d'abus).
+
+---
+
+## 📂 Structure des projets
+
+### Frontend
+```
+src/
+├── routes/       # Pages (file-based routing TanStack Router)
+├── features/     # Logique métier par domaine (artists, auth, payment, profile, deezer, globe)
+├── shared/       # Composants, config et utilitaires réutilisables
+└── integrations/ # Intégrations tierces (TanStack Query)
+```
+
+### Backend
+```
+internal/
+├── core/         # DB, migrations, middlewares CORS, rate limiting, tokens
+└── features/     # Handlers + services par domaine (artists, auth, payment, user)
+migrations/       # Scripts SQL versionnés
+```
+
+---
+
+## 🧪 Tests
+
+```bash
+# Frontend
+npm run test
+```
+
+---
+
+*Fait avec ❤️ par Ilyace (ikadri-droid) et Thomas.*
